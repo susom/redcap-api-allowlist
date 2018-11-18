@@ -11,33 +11,34 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 {
     use emLoggerTrait;
 
-    private $token;             // request token
-    private $ip;                // request ip
-    private $username;          // request username
-    private $project_id;        // request project_id
+    public $token;             // request token
+    public $ip;                // request ip
+    public $username;          // request username
+    public $project_id;        // request project_id
 
-    private $required_whitelist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
-    public $config_valid;       // configuation valid
+    public $required_whitelist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
+    public $config_valid;      // configuation valid
     public $config_errors;     // array of configuration errors
-    private $logging_option;    // configured log option
+    public $logging_option;    // configured log option
 
-    private $ts_start;          // script start
+    public $ts_start;          // script start
     public $config_pid;        // configuration project
-    private $rules;             // Rules from rules database
+    public $rules;             // Rules from rules database
 
-    private $result;            // PASS / REJECT / ERROR / SKIP
-    private $rule_id;           // Match rule_id if any
-    private $comment;           // Text comment
-    private $log_id;            // log_id if last inserted db log
+    public $result;            // PASS / REJECT / ERROR / SKIP
+    public $rule_id;           // Match rule_id if any
+    public $comment;           // Text comment
+    public $log_id;            // log_id if last inserted db log
 
     const LOG_TABLE                      = 'redcap_log_api_whitelist';
-    const REQUIRED_WHITELIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
+    const REQUIRED_WHITELIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'enabled');
     const KEY_LOGGING_OPTION             = 'whitelist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'config-pid';
-
+    const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
+    const KEY_REJECTION_EMAIL_LOGS       = 'rejection-email-logs';
 
     public function __construct() {
         parent::__construct();
@@ -189,6 +190,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logRequest();
                 break;
             case "REJECT":
+                $this->checkRejectionEmailNotification();
+
                 $this->logRequest();
 
                 //$this->emDebug("INVALID REQUEST", $this->ip, $this->username, $this->project_id, $this->rule_id);
@@ -240,6 +243,51 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             // Load all of the whitelist rules
             $this->loadRules($this->config_pid);
 
+            foreach ($this->rules as $rule) {
+                // IP RULE
+                $results = array();
+
+                if ($rule['whitelist_type___1']) {
+                    // Assume we do not have a valid IP
+                    $ip_valid = false;
+
+                    // Parse out valid CIDR ranges
+                    $re = '/(?:\d{1,3}\.){3}\d{1,3}(?:\/\d{1,3})?/m';
+                    $matches = array();
+                    preg_match_all($re, $rule['ip_address'], $matches, PREG_SET_ORDER, 0);
+                    if (count($matches) == 0 ) $this->emError("Unable to parse valid ip_address range for API Whitelist rule " . $rule['rule_id']);
+                    foreach ($matches as $range) {
+                        $this->emDebug("Checking " . $this->ip . " against " . $range);
+                    }
+
+                    //$ip_ranges = explode("")
+                }
+
+                if (empty($rule['username']) AND empty($rule['project_id'])) continue;
+                if ($rule['inactive___1'] == '1') continue;
+
+
+                if ($rule['username'] === $this->username AND $rule['project_id'] == $this->project_id) {
+                    // Allow based on username and project_id match
+                    $this->rule_id = $rule['rule_id'];
+                    return true;
+                }
+
+                if ($rule['project_id'] == $this->project_id AND empty($rule['username'])) {
+                    // Allow based on project_id
+                    $this->rule_id = $rule['rule_id'];
+                    return true;
+                }
+
+                if ($rule['username'] === $this->username AND empty($rule['project_id'])) {
+                    // Allow based on username role
+                    $this->rule_id = $rule['rule_id'];
+                    return true;
+                }
+            }
+        return false;
+
+
 
             // Check for IP match
             if ($this->validIpAddress()) {
@@ -263,6 +311,21 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             $this->comment = "Screen request error: " . $e->getMessage();
             return "ERROR";
         }
+    }
+
+
+    function checkRejectionEmailNotification() {
+        // Don't do anything if this isn't enabled
+        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)) return;
+
+        // If the username is empty - then we can't do anything either
+        if (empty($this->username)) return;
+
+        // Get the recent notifications
+        $email_logs = $this->getSystemSetting(self::KEY_REJECTION_EMAIL_LOGS);
+
+        $this->emDebug("Email Logs", $email_logs);
+
     }
 
 
@@ -459,7 +522,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @param $pid
      */
     function loadRules($pid) {
-        $q = REDCap::getData($pid, 'json');
+        $q = REDCap::getData($pid, 'json'); //, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
         $this->rules = json_decode($q,true);
     }
 

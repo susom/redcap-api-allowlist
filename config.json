@@ -62,6 +62,12 @@
       "type": "textarea"
     },
     {
+      "key": "rejection-email-notification",
+      "name": "<b>Notify Rejected Users</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per hour will be sent.",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
       "key": "configuration-validation-errors",
       "name": "",
       "required": false,
