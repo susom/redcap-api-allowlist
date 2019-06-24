@@ -22,6 +22,6 @@ A REDCap database table is created as well for this module that is used for logg
 - You can allow access by user/project - this will allow only certain users from specific projects to access the API
 
 
+ ## TODO:
  
-#### System Level Directions
- * FIIX>>>>>Establish an API key for reCaptcha [here](https://www.google.com/recaptcha/admin#list)
+ 

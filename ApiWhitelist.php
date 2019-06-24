@@ -584,7 +584,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     }
 
 
-    //
     /**
      * Checks if the IP is valid given an IP or CIDR range
      * e.g. 192.168.123.1 = 192.168.123.1/30
