@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:redcap="https://projectredcap.org" xsi:schemaLocation="http://www.cdisc.org/ns/odm/v1.3 schema/odm/ODM1-3-1.xsd" ODMVersion="1.3.1" FileOID="000-00-0000" FileType="Snapshot" Description="API Whitelist Configuration Project" AsOfDateTime="2019-06-24T10:29:31" CreationDateTime="2019-06-24T10:29:31" SourceSystem="REDCap" SourceSystemVersion="9.1.0">
+<Study OID="Project.APIWhitelistConfigurationProje">
+<GlobalVariables>
+	<StudyName>API Whitelist Configuration Project</StudyName>
+	<StudyDescription>This file contains the metadata, events, and data for REDCap project "API Whitelist Configuration Project".</StudyDescription>
+	<ProtocolName>API Whitelist Configuration Project</ProtocolName>
+	<redcap:RecordAutonumberingEnabled>1</redcap:RecordAutonumberingEnabled>
+	<redcap:CustomRecordLabel>[ip_address] [username] [project_id]</redcap:CustomRecordLabel>
+	<redcap:SecondaryUniqueField></redcap:SecondaryUniqueField>
+	<redcap:SchedulingEnabled>0</redcap:SchedulingEnabled>
+	<redcap:SurveysEnabled>0</redcap:SurveysEnabled>
+	<redcap:SurveyInvitationEmailField></redcap:SurveyInvitationEmailField>
+	<redcap:Purpose>4</redcap:Purpose>
+	<redcap:PurposeOther></redcap:PurposeOther>
+	<redcap:ProjectNotes>This project manages API whitelisted IP addresses, users, and projects</redcap:ProjectNotes>
+</GlobalVariables>
+<MetaDataVersion OID="Metadata.APIWhitelistConfigurationProje_2019-06-24_1029" Name="API Whitelist Configuration Project" redcap:RecordIdField="rule_id">
+	<FormDef OID="Form.api_whitelist_rules" Name="API Whitelist Rules" Repeating="No" redcap:FormName="api_whitelist_rules">
+		<ItemGroupRef ItemGroupOID="api_whitelist_rules.rule_id" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_whitelist_rules.api_whitelist_rules_complete" Mandatory="No"/>
+	</FormDef>
+	<ItemGroupDef OID="api_whitelist_rules.rule_id" Name="API Whitelist Rules" Repeating="No">
+		<ItemRef ItemOID="rule_id" Mandatory="No" redcap:Variable="rule_id"/>
+		<ItemRef ItemOID="description" Mandatory="No" redcap:Variable="description"/>
+		<ItemRef ItemOID="rule_description" Mandatory="No" redcap:Variable="rule_description"/>
+		<ItemRef ItemOID="whitelist_type___1" Mandatory="Yes" redcap:Variable="whitelist_type"/>
+		<ItemRef ItemOID="whitelist_type___2" Mandatory="Yes" redcap:Variable="whitelist_type"/>
+		<ItemRef ItemOID="whitelist_type___3" Mandatory="Yes" redcap:Variable="whitelist_type"/>
+		<ItemRef ItemOID="ip_address" Mandatory="Yes" redcap:Variable="ip_address"/>
+		<ItemRef ItemOID="username" Mandatory="Yes" redcap:Variable="username"/>
+		<ItemRef ItemOID="project_id" Mandatory="Yes" redcap:Variable="project_id"/>
+		<ItemRef ItemOID="desc_active_warning" Mandatory="No" redcap:Variable="desc_active_warning"/>
+		<ItemRef ItemOID="expiration_date" Mandatory="No" redcap:Variable="expiration_date"/>
+		<ItemRef ItemOID="enabled___1" Mandatory="No" redcap:Variable="enabled"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_whitelist_rules.api_whitelist_rules_complete" Name="Form Status" Repeating="No">
+		<ItemRef ItemOID="api_whitelist_rules_complete" Mandatory="No" redcap:Variable="api_whitelist_rules_complete"/>
+	</ItemGroupDef>
+	<ItemDef OID="rule_id" Name="rule_id" DataType="text" Length="999" redcap:Variable="rule_id" redcap:FieldType="text">
+		<Question><TranslatedText>Rule ID</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="description" Name="description" DataType="text" Length="999" redcap:Variable="description" redcap:FieldType="descriptive">
+		<Question><TranslatedText>Whitelist Rule Details
+A whitelist rule is only valid if all configured filters are true.  So, the more specific you are, the more limiting your filter is.</TranslatedText><redcap:FormattedTranslatedText>Whitelist Rule Details
+&lt;div style=&#039;font-weight: normal&#039;&gt;A whitelist rule is only valid if all configured filters are true.  So, the more specific you are, the more limiting your filter is.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="rule_description" Name="rule_description" DataType="text" Length="999" redcap:Variable="rule_description" redcap:FieldType="textarea" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Description of this rule</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="whitelist_type___1" Name="whitelist_type___1" DataType="boolean" Length="1" redcap:Variable="whitelist_type" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Whitelist Options
+If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.</TranslatedText><redcap:FormattedTranslatedText>Whitelist Options
+&lt;div style=&quot;font-weight:normal&quot;&gt;If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<CodeListRef CodeListOID="whitelist_type___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="whitelist_type___2" Name="whitelist_type___2" DataType="boolean" Length="1" redcap:Variable="whitelist_type" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Whitelist Options
+If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.</TranslatedText><redcap:FormattedTranslatedText>Whitelist Options
+&lt;div style=&quot;font-weight:normal&quot;&gt;If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<CodeListRef CodeListOID="whitelist_type___2.choices"/>
+	</ItemDef>
+	<ItemDef OID="whitelist_type___3" Name="whitelist_type___3" DataType="boolean" Length="1" redcap:Variable="whitelist_type" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Whitelist Options
+If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.</TranslatedText><redcap:FormattedTranslatedText>Whitelist Options
+&lt;div style=&quot;font-weight:normal&quot;&gt;If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<CodeListRef CodeListOID="whitelist_type___3.choices"/>
+	</ItemDef>
+	<ItemDef OID="ip_address" Name="ip_address" DataType="text" Length="999" redcap:Variable="ip_address" redcap:FieldType="textarea" redcap:FieldNote="e.g. 192.168.0.1/24, 10.0.0.1 &lt;a href=&#039;https://grox.net/utils/whatmask/&#039; target=&#039;_BLANK&#039;&gt;&lt;div class=&#039;btn btn-xs btn-primaryrc&#039;&gt;Calculator&lt;/div&gt;&lt;/a&gt;" redcap:RequiredField="y" redcap:BranchingLogic="[whitelist_type(1)] = &#039;1&#039;">
+		<Question><TranslatedText>IP Address(es) (CIDR Notation Supported)
+Enter 1 or more CIDR blocks separated by a comma or new-line</TranslatedText><redcap:FormattedTranslatedText>IP Address(es) (CIDR Notation Supported)
+&lt;div style=&quot;font-weight:normal&quot;&gt;Enter 1 or more CIDR blocks separated by a comma or new-line&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="username" Name="username" DataType="text" Length="10" redcap:Variable="username" redcap:FieldType="sql" redcap:TextValidationType="autocomplete" redcap:FieldNote="e.g. andy123" redcap:RequiredField="y" redcap:BranchingLogic="[whitelist_type(2)] = &#039;1&#039;">
+		<Question><TranslatedText>Username</TranslatedText></Question>
+		<CodeListRef CodeListOID="username.choices"/>
+	</ItemDef>
+	<ItemDef OID="project_id" Name="project_id" DataType="text" Length="2" redcap:Variable="project_id" redcap:FieldType="sql" redcap:TextValidationType="autocomplete" redcap:RequiredField="y" redcap:BranchingLogic="[whitelist_type(3)] = &#039;1&#039;">
+		<Question><TranslatedText>Project Id</TranslatedText></Question>
+		<CodeListRef CodeListOID="project_id.choices"/>
+	</ItemDef>
+	<ItemDef OID="desc_active_warning" Name="desc_active_warning" DataType="text" Length="999" redcap:Variable="desc_active_warning" redcap:FieldType="descriptive" redcap:BranchingLogic="datediff([expiration_date],&quot;today&quot;,&quot;d&quot;,&quot;ymd&quot;,true) &gt; 0 OR [enabled(1)] = &quot;0&quot; OR ( sum([whitelist_type(1)],[whitelist_type(2)],[whitelist_type(3)]) = 0 )">
+		<Question><TranslatedText>This whitelist rule is not active</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-danger text-center&#039;&gt;This whitelist rule is not active&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="expiration_date" Name="expiration_date" DataType="date" Length="999" redcap:Variable="expiration_date" redcap:FieldType="text" redcap:TextValidationType="date_ymd" redcap:FieldNote="Rule will stop working after date if specified">
+		<Question><TranslatedText>Expiration Date</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="enabled___1" Name="enabled___1" DataType="boolean" Length="1" redcap:Variable="enabled" redcap:FieldType="checkbox" redcap:FieldNote="You must check to enable this rule">
+		<Question><TranslatedText></TranslatedText></Question>
+		<CodeListRef CodeListOID="enabled___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="api_whitelist_rules_complete" Name="api_whitelist_rules_complete" DataType="text" Length="1" redcap:Variable="api_whitelist_rules_complete" redcap:FieldType="select" redcap:SectionHeader="Form Status">
+		<Question><TranslatedText>Complete?</TranslatedText></Question>
+		<CodeListRef CodeListOID="api_whitelist_rules_complete.choices"/>
+	</ItemDef>
+	<CodeList OID="whitelist_type___1.choices" Name="whitelist_type___1" DataType="boolean" redcap:Variable="whitelist_type" redcap:CheckboxChoices="1, IP (filter by ip/networks) | 2, User (filter by username) | 3, Project (filter by project id)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="whitelist_type___2.choices" Name="whitelist_type___2" DataType="boolean" redcap:Variable="whitelist_type" redcap:CheckboxChoices="1, IP (filter by ip/networks) | 2, User (filter by username) | 3, Project (filter by project id)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="whitelist_type___3.choices" Name="whitelist_type___3" DataType="boolean" redcap:Variable="whitelist_type" redcap:CheckboxChoices="1, IP (filter by ip/networks) | 2, User (filter by username) | 3, Project (filter by project id)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="username.choices" Name="username" DataType="text" redcap:Variable="username">
+		<CodeListItem CodedValue="alvaro1"><Decode><TranslatedText>[alvaro1] Alvaro Alvarez</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="andy123"><Decode><TranslatedText>[andy123] Andy Martin</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="site_admin"><Decode><TranslatedText>[site_admin] Joe User</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="test"><Decode><TranslatedText>[test] Test User</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="project_id.choices" Name="project_id" DataType="text" redcap:Variable="project_id">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>[1] Classic Database</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="2"><Decode><TranslatedText>[2] Longitudinal Database (1 arm)</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="3"><Decode><TranslatedText>[3] Longitudinal Database (2 arms)</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="4"><Decode><TranslatedText>[4] Single Survey</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="5"><Decode><TranslatedText>[5] Basic Demography</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="6"><Decode><TranslatedText>[6] Project Tracking Database</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="7"><Decode><TranslatedText>[7] Randomized Clinical Trial</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="8"><Decode><TranslatedText>[8] Human Cancer Tissue Biobank</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="9"><Decode><TranslatedText>[9] Multiple Surveys (classic)</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="10"><Decode><TranslatedText>[10] Multiple Surveys (longitudinal)</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="11"><Decode><TranslatedText>[11] Piping Example Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="12"><Decode><TranslatedText>[12] Repeating Instruments</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="13"><Decode><TranslatedText>[13] EKG Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="14"><Decode><TranslatedText>[14] Example Complex Data 1</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="15"><Decode><TranslatedText>[15] Example Complex Data 2</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="16"><Decode><TranslatedText>[16] Shazam Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="17"><Decode><TranslatedText>[17] Test of autocontinue in repeating events</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="18"><Decode><TranslatedText>[18] One I am not on!</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="19"><Decode><TranslatedText>[19] Custom Survey Landing Page</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="20"><Decode><TranslatedText>[20] FCR Example</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="21"><Decode><TranslatedText>[21] test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="23"><Decode><TranslatedText>[23] PIRADS Imagemap Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="24"><Decode><TranslatedText>[24] Permission Test Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="25"><Decode><TranslatedText>[25] File Upload Test Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="26"><Decode><TranslatedText>[26] bfbdf</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="27"><Decode><TranslatedText>[27] Test for BriteVerify</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="28"><Decode><TranslatedText>[28] API Whitelist Configuration Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="29"><Decode><TranslatedText>[29] File Permissions</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="30"><Decode><TranslatedText>[30] Random Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="31"><Decode><TranslatedText>[31] Shazam Test Small</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="32"><Decode><TranslatedText>[32] Paul Litwin Shazam Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="33"><Decode><TranslatedText>[33] EKG Project - TIE BREAKER DATA</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="34"><Decode><TranslatedText>[34] EKG Project - ACTUAL RESULTS</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="35"><Decode><TranslatedText>[35] TEST 15088 LOGIC</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="36"><Decode><TranslatedText>[36] AutoContinue Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="37"><Decode><TranslatedText>[37] Insert Instrument Test Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="38"><Decode><TranslatedText>[38] MMD Screen</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="39"><Decode><TranslatedText>[39] MMD CHILD</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="40"><Decode><TranslatedText>[40] Litwin ASI Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="41"><Decode><TranslatedText>[41] Survey Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="42"><Decode><TranslatedText>[42] Autocontinue Skip Logic Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="43"><Decode><TranslatedText>[43] Summarize EM Test Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="44"><Decode><TranslatedText>[44] Test Survey Mark Complete</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="45"><Decode><TranslatedText>[45] ACLOGIC TEST FROM LUKE</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="46"><Decode><TranslatedText>[46] TEST 2</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="47"><Decode><TranslatedText>[47] SQ Checkbox Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="48"><Decode><TranslatedText>[48] Test for Esignature</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="49"><Decode><TranslatedText>[49] Giftcard Library</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="50"><Decode><TranslatedText>[50] GiftCard Using Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="51"><Decode><TranslatedText>[51] Summarize Test</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="52"><Decode><TranslatedText>[52] Rank Sortable</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="53"><Decode><TranslatedText>[53] Autonotify 3 Test Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="54"><Decode><TranslatedText>[54] Advanced DET Test Project</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="55"><Decode><TranslatedText>[55] CAT TEST</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="56"><Decode><TranslatedText>[56] Autocontinue logic repeat instances</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="57"><Decode><TranslatedText>[57] Shibboleth Example Authentication</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="58"><Decode><TranslatedText>[58] Dag Test</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="enabled___1.choices" Name="enabled___1" DataType="boolean" redcap:Variable="enabled" redcap:CheckboxChoices="1, Check to enable this rule">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="api_whitelist_rules_complete.choices" Name="api_whitelist_rules_complete" DataType="text" redcap:Variable="api_whitelist_rules_complete">
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Incomplete</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Unverified</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="2"><Decode><TranslatedText>Complete</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+</MetaDataVersion>
+</Study>
+</ODM>
