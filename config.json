@@ -14,6 +14,11 @@
       "name": "Andrew Martin",
       "email": "andy123@stanford.edu",
       "institution": "Stanford University"
+    },
+    {
+      "name": "Jordan Schultz",
+      "email": "jmschult@stanford.edu",
+      "institution": "Stanford University"
     }
   ],
 
@@ -48,8 +53,14 @@
       "type": "descriptive"
     },
     {
+      "key": "first-time-setup",
+      "name": "<b>First Time Setup</b><br>If this is your first time configuring this module, check this box and press save to create a new API rule project and set basic defaults",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
       "key": "config-pid",
-      "name": "<b>API Whitelist Configuration Project</b><br>This module stores all whitelist rules in a redcap project.  This is how you will add/edit rules once enabled.",
+      "name": "<b>API Whitelist Configuration Project</b><br>This module stores all whitelist rules in a redcap project.  This is how you will add/edit rules once enabled. If you have an existing configuration the default may be replaced",
       "required": false,
       "type": "project-id",
       "source": "js/api_whitelist.js",
@@ -66,6 +77,18 @@
       "name": "<b>Notify Rejected Users</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per hour will be sent.",
       "required": false,
       "type": "checkbox"
+    },
+    {
+      "key": "rejection-email-header",
+      "name": "<b>Rejection Email Header</b><br>This field will be included in the email for rejected API requests",
+      "required": false,
+      "type": "rich-text"
+    },
+    {
+      "key": "rejection-email-from-address",
+      "name": "<b>Rejection Email From Address</b><br>(e.g. no-reply@myredcap.com or help@myredcap.com)",
+      "required": false,
+      "type": "email"
     },
     {
       "key": "configuration-validation-errors",

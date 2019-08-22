@@ -5,7 +5,7 @@ This external module adds additional IP and user-based constraints on API access
 This module provides a whitelist mechanism to allow certain projects to use the API functionality while
 limiting others by user / project / and network IP address.
 
-There is a REDCap project that acts as the API Whitelist database.  Each record in this proejct
+There is a REDCap project that acts as the API Whitelist database.  Each record in this project
 is an exception to the firewall - allowing users to connect to your REDCap instance.
 
 When an API request arrives to your server, the Whitelist database is checked - only if the request matches

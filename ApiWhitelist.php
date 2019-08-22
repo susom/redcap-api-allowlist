@@ -2,10 +2,11 @@
 namespace Stanford\ApiWhitelist;
 
 include_once "emLoggerTrait.php";
-
+include_once "createProjectFromXML.php";
 use \REDCap;
 use \Exception;
 use \Logging;
+
 
 class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 {
@@ -39,6 +40,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_CONFIG_PID                 = 'config-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
     const KEY_REJECTION_EMAIL_LOGS       = 'rejection-email-logs';
+    const DEFAULT_REJECTION_MESSAGE      = 'This redcap API is restricted using the API whitelist external module. To request an exception for your project, please email HOMEPAGE_CONTACT_EMAIL';
+    const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
 
     public function __construct() {
         parent::__construct();
@@ -53,6 +56,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     function redcap_module_save_configuration($project_id) {
+        $this->checkFirstTimeSetup();
         $this->validateSetup();
         $this->emDebug('Config Updated.  Valid?', $this->config_valid);
     }
@@ -73,6 +77,155 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return $link;
     }
 
+    function checkFirstTimeSetup(){
+        global $homepage_contact_email;
+
+        if($this->getSystemSetting('first-time-setup')){
+            $this->createAPIWhiteListRulesProject();
+        }
+        $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
+        $this->emDebug($homepage_contact_email, $rejectionMessage);
+        $this->setSystemSetting('rejection-message', $rejectionMessage);
+        $this->setSystemSetting('first-time-setup',0);
+        $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, 1);
+        $this->setSystemSetting('whitelist-logging-option','1');
+    }
+
+    /**
+     * Fetch all users from within the external modules log that have been sent a email notification within
+     *  the MIN_EMAIL_RESEND_DURATION threshold
+     * @return array : array of users that have already been notified
+     */
+    function getRecentlyNotifiedUsers() {
+        $sql = "select user, max(timestamp) as ts where message = 'NOTIFICATION' group by user";
+        $q = $this->queryLogs($sql);
+        $usersRecentlyNotified = array();
+        while($row = db_fetch_assoc($q)) {
+            $user = $row['user'];
+            $ts = $row['ts'];
+            $diff = round((strtotime("NOW") - strtotime($ts)) / 60,2);
+            if($diff < self::MIN_EMAIL_RESEND_DURATION){
+                //dont notify these users, already notified
+                array_push($usersRecentlyNotified, $user);
+            }
+        }
+        $this->emDebug('Users not to Notify', $usersRecentlyNotified);
+        return $usersRecentlyNotified;
+    }
+
+    /**
+     * Fetch all rejection notifications since last email and group by user
+     * @param null $userFilter
+     * @return 2d array, each rejection row indexed by user
+     */
+    function getRejectionNotifications($userFilter = null) {
+        $sql = "select log_id, timestamp, ip, project_id, user where message = 'REJECT'";
+        $q = $this->queryLogs($sql);
+        $payload = array();
+
+        while($row = db_fetch_assoc($q)){
+            $user = $row['user'];
+            if(in_array($user,$userFilter)){
+                //if in the recently notified users list, skip
+                continue;
+            } else {
+                //sum all query information, notify user
+                if(!array_key_exists($user, $payload)){
+                    //create user in payload array
+                    $this->emDebug($user, $payload);
+                    $payload[$user] = array();
+                }
+                array_push($payload[$user], $row);
+            }
+        }
+        return $payload;
+    }
+
+    /**
+     * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
+     * @throws Exception
+     * @return void
+     */
+    function checkNotifications() {
+        $filter = $this->getRecentlyNotifiedUsers();
+        //fetch users that have already been notified within the threshold period
+
+        $notifications = ($this->getRejectionNotifications($filter));
+        //fetch all rejection messages, grouped by user
+
+        if(!empty($notifications)) {
+            $header = $this->getSystemSetting('rejection-email-header');
+            $rejectionEmailFrom = $this->getSystemSetting('rejection-email-from-address');
+            if(!empty($rejectionEmailFrom)) {
+                foreach($notifications as $user => $rows){
+                    $logIds = array();
+                    $sql = "SELECT user_email from  redcap_user_information where username = '" . db_real_escape_string($this->username) . "'";
+                    $q = $this->query($sql);
+                    $email = db_result($q,0);
+                    //fetch the first col in the returned row
+
+                    $table = "<table>
+                                <thead><tr>
+                                    <th>Time</th>
+                                    <th>IP Address</th>
+                                    <th>Project ID</th>
+                                </tr></thead>
+                              <tbody>";
+
+                    foreach ($rows as $row) {
+                        $table .= "<tr><td>{$row['timestamp']}</td><td>{$row['ip']}</td><td>{$row['project_id']}</td></tr>";
+                        array_push($logIds, $row['log_id']);
+                        //keep track of logID to remove from table upon fin
+                    }
+                    $table .= "</tbody></table>";
+                    $messageBody = $header . "<hr>" . $table;
+                    $emailResult = REDCap::email($email,$rejectionEmailFrom,'API whitelist rejection notice', $messageBody);
+                    if($emailResult){
+                        $this->logNotification($user);
+
+                        $this->emLog('deleting log_ids', $logIds);
+
+                        $sql = 'log_id in ('. implode(',', $logIds) . ')';
+                        $this->removeLogs($sql);
+                    } else {
+                        $this->emError('Email not sent', $messageBody , $rejectionEmailFrom, $email);
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * Create a NOTIFICATION entry in the log table : indicates when last email was sent
+     * @param $user , username
+     * @return void
+     */
+
+    function logNotification($user){
+        $this->log("NOTIFICATION", array(
+            'user' => $user
+        ));
+    }
+
+    /**
+     * Create a REJECT entry in the log table
+     * @throws Exception
+     */
+    function logRejection() {
+        // Are we logging rejections for email?
+        $emailRejection = $this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY);
+        if (empty($emailRejection)) {
+            // No need to do anything
+            return;
+        }
+
+        // Log the rejection
+        $this->log("REJECT", array(
+            'user' => $this->username,
+            'ip'    => $this->ip,
+            'project_id' => $this->project_id)
+        );
+    }
+
 
     /**
      * Determine if the module is configured properly
@@ -82,7 +235,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @throws Exception
      */
     function validateSetup($quick_check = false) {
-
         // Quick Check
         if ($quick_check) {
             // Let's just look at the KEY_VALID_CONFIGURATION setting
@@ -91,16 +243,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 return false;
             }
         }
-
         // Do a thorough check
-
         // Verify that the module is set up correctly
         $config_errors = array();
 
-
         // Make sure rejection message is set
         if (empty($this->getSystemSetting(self::KEY_REJECTION_MESSAGE))) $config_errors[] = "Missing rejection message in module setup";
-
 
         // Make sure configuration project is set
         $this->config_pid = $this->getSystemSetting(self::KEY_CONFIG_PID);
@@ -120,13 +268,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             if (!empty($missing)) $config_errors[] = "The API Whitelist project (#$this->config_pid) is missing required fields: " . implode(", ", $missing);
         }
 
-
         // Check for custom log table
         if ($this->getSystemSetting(self::KEY_LOGGING_OPTION) == 1) {
-
             // Make sure we have the custom log table
             if(! $this->tableExists(self::LOG_TABLE)) {
-
                 // Table missing - try to create the table
                 $this->emDebug("Trying to create custom logging table in database: " . self::LOG_TABLE);
                 if (! $this->createLogTable()) {
@@ -149,7 +294,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->emDebug("Custom log table verified");
             }
         }
-
         // Save setup validation to database so we don't have to do this on each api call
         $this->config_valid = empty($config_errors);
         $this->config_errors = $config_errors;
@@ -168,6 +312,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Try to keep light-weight to skip non-API requests
      * Init on API requests
      * @param null $project_id
+     * @throws
+     * @returns void
      */
     function redcap_every_page_before_render ($project_id = null) {
 
@@ -190,11 +336,11 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logRequest();
                 break;
             case "REJECT":
-                $this->checkRejectionEmailNotification();
-
+//                $this->checkRejectionEmailNotification();
                 $this->logRequest();
+                $this->logRejection();
+                $this->checkNotifications();
 
-                //$this->emDebug("INVALID REQUEST", $this->ip, $this->username, $this->project_id, $this->rule_id);
                 header('HTTP/1.0 403 Forbidden');
                 echo $this->getSystemSetting(self::KEY_REJECTION_MESSAGE);
                 $this->exitAfterHook();     // Prevent API code from executing
@@ -203,6 +349,38 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->emError("Unexpected result from screenRequest: ", $this->result);
         }
         return;
+    }
+
+
+    /**
+     * Function that dynamically creates and assigns a API whitelist Redcap project
+     * @return boolean success
+     * @throws Exception
+     */
+    public function createAPIWhiteListRulesProject(){
+        $odmFile = $this->getModulePath() . 'assets/APIWhitelistRulesProject.xml';
+        $this->emDebug("ODM FILE",$odmFile);
+        $newProjectHelper = new createProjectFromXML($this);
+        $superToken = $newProjectHelper->getSuperToken(USERID);
+
+        if (empty($superToken)) {
+            $this->emError("Unable to get SuperToken to create Rules project");
+            return false;
+        }
+
+        // Import Project
+        $newToken = $newProjectHelper->createProjectFromXMLfile($superToken, $odmFile);
+        $this->emDebug('heres the new token', $newToken);
+        list($username, $newProjectID) = $this->getUserProjectFromToken($newToken);
+        $this->emDebug('fin', $username, $newProjectID);
+
+        // Set the config project id
+        $this->setSystemSetting('config-pid', $newProjectID);
+
+        // Fix dynamic SQL fields
+        $newProjectHelper->convertDyanicSQLField($newProjectID,'username','select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;');
+        $newProjectHelper->convertDyanicSQLField($newProjectID,'project_id','select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;');
+        return true;
     }
 
 
@@ -233,7 +411,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 return "SKIP";
             }
 
-
             // Get the IP
             $this->ip = trim($_SERVER['REMOTE_ADDR']);
 
@@ -243,67 +420,42 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             // Load all of the whitelist rules
             $this->loadRules($this->config_pid);
 
-            foreach ($this->rules as $rule) {
-                // IP RULE
-                $results = array();
-
-                if ($rule['whitelist_type___1']) {
-                    // Assume we do not have a valid IP
-                    $ip_valid = false;
-
-                    // Parse out valid CIDR ranges
-                    $re = '/(?:\d{1,3}\.){3}\d{1,3}(?:\/\d{1,3})?/m';
-                    $matches = array();
-                    preg_match_all($re, $rule['ip_address'], $matches, PREG_SET_ORDER, 0);
-                    if (count($matches) == 0 ) $this->emError("Unable to parse valid ip_address range for API Whitelist rule " . $rule['rule_id']);
-                    foreach ($matches as $range) {
-                        $this->emDebug("Checking " . $this->ip . " against " . $range);
-                    }
-
-                    //$ip_ranges = explode("")
-                }
-
-                if (empty($rule['username']) AND empty($rule['project_id'])) continue;
-                if ($rule['inactive___1'] == '1') continue;
-
-
-                if ($rule['username'] === $this->username AND $rule['project_id'] == $this->project_id) {
-                    // Allow based on username and project_id match
-                    $this->rule_id = $rule['rule_id'];
-                    return true;
-                }
-
-                if ($rule['project_id'] == $this->project_id AND empty($rule['username'])) {
-                    // Allow based on project_id
-                    $this->rule_id = $rule['rule_id'];
-                    return true;
-                }
-
-                if ($rule['username'] === $this->username AND empty($rule['project_id'])) {
-                    // Allow based on username role
-                    $this->rule_id = $rule['rule_id'];
-                    return true;
-                }
-            }
-        return false;
-
-
-
-            // Check for IP match
-            if ($this->validIpAddress()) {
-                // Request matches IP rule
-                return "PASS";
-            }
-
             // Get the project and user from the token
             $this->loadProjectUsername($this->token);
 
-            // Verify that username/project are valid
-            if ($this->validProjectUsername()) {
-                return "PASS";
+            if(empty($this->rules)){
+                $this->emLog('No current rules are set in current whitelist config');
             }
 
-            // Fail request
+            foreach ($this->rules as $rule) {
+                //check all records if pass, else reject
+                $this->rule_id = $rule['rule_id'];
+
+                $check_ip = $rule['whitelist_type___1'];
+                $check_user = $rule['whitelist_type___2'];
+                $check_pid = $rule['whitelist_type___3'];
+
+                if (!($check_ip || $check_user || $check_pid)) {
+                    // NONE ARE CHECKED - SKIP THIS CONFIG
+                    $this->emError("Rule " . $rule['rule_id'] . " does not have any filters checked!");
+                    continue;
+                }
+
+                $valid_ip = $check_ip ? $this->validIP($rule['ip_address']) : true;
+                $valid_user = $check_user ? $this->validUser($rule['username']) : true;
+                $valid_pid = $check_pid ? $this->validPid($rule['project_id']) : true;
+
+                $this->emDebug($valid_ip, $valid_user, $valid_pid);
+
+
+                if ($valid_ip && $valid_user && $valid_pid) {
+                    // APPROVE API REQUEST
+                    return "PASS";
+                }
+
+            } // End of rules
+
+            //Fail request
             return "REJECT";
 
         } catch (Exception $e) {
@@ -313,20 +465,72 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         }
     }
 
+    /**
+     * Check if current user IP is valid under any of the specified rules
+     * Param: String CIDR values
+     * @return bool T/F
+     */
+    function validIP($cidrs) {
+        $this->emError('CIDRS', $cidrs);
+        $ips = preg_split("/[\n,]/", $cidrs);
+        $this->emError($ips);
 
-    function checkRejectionEmailNotification() {
-        // Don't do anything if this isn't enabled
-        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)) return;
-
-        // If the username is empty - then we can't do anything either
-        if (empty($this->username)) return;
-
-        // Get the recent notifications
-        $email_logs = $this->getSystemSetting(self::KEY_REJECTION_EMAIL_LOGS);
-
-        $this->emDebug("Email Logs", $email_logs);
-
+        //check if any of the ips are valid
+        foreach($ips as $ip){
+            if($this->ipCIDRCheck(trim($ip)))
+                return true;
+        }
+        return false;
     }
+
+
+    /**
+     * Checks equality between current user and $username
+     * Param: String $username
+     * @return bool T/F
+     */
+    function validUser($username) {
+        if (empty($username)) {
+            $this->emError("unable to parse username from rule ". $this->rule_id);
+        }
+        if (empty($this->username)) {
+            $this->emError("Unable to parse username from token " . $this->token);
+        }
+        $this->emError($this->username, $username);
+
+        return $this->username == $username;
+    }
+
+
+    /**
+     * Checks equality between project and $pid
+     * Param: String $pid
+     * @return bool T/F
+     * @throws Exception
+     */
+    function validPid($pid) {
+        if (empty($pid)) {
+            $this->emError("Unable to parse project_id from rule" . $this->rule_id);
+            throw new Exception ("Unable to parse project_id from rule " . $this->rule_id);
+        }
+        if (empty($this->project_id)) {
+            throw new Exception ("Unable to parse project_id from token " . $this->token);
+        }
+        return $this->project_id == $pid;
+    }
+
+
+//    function checkRejectionEmailNotification() {
+//        // Don't do anything if this isn't enabled
+//        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)){
+//            return;
+//        }
+//
+//        // If the username is empty - then we can't do anything either
+//        if (empty($this->username)){
+//            return;
+//        }
+//    }
 
 
     /**
@@ -360,7 +564,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 Logging::logEvent("", self::LOG_TABLE, "OTHER", null, $cm, "API Whitelist Request $this->result", "", $this->username, $this->project_id);
                 break;
         }
-
         // Log to EmLogger
         $this->emLog(array(
             "result"     => $this->result,
@@ -406,51 +609,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * This function is called from a shutdown to update the database entry with the elapsed duration of the API call in the event
      * a local database is used for logging
      */
-    function logToDatabaseUpdateDuration() {
+    public function logToDatabaseUpdateDuration() {
         $duration = round((microtime(true) - $this->ts_start) * 1000, 3);
         $sql = sprintf("UPDATE %s SET duration = %u where log_id = %d LIMIT 1",
             self::LOG_TABLE, $duration, $this->log_id);
         $q = db_query($sql);
         $this->emDebug($this->log_id, $this->ts_start, $sql, $q);
-    }
-
-
-    /**
-     * Look through all rules to find a matching username/project_id setting
-     * @return bool
-     */
-    public function validProjectUsername() {
-        // Skip if we don't have a valid username and project_id
-        if (empty($this->username) OR empty($this->project_id)) {
-            $this->emDebug("Missing valid username or project", $_POST);
-            return false;
-        }
-
-        // Go through each rule and check for a match
-        foreach ($this->rules as $rule) {
-            if (empty($rule['username']) AND empty($rule['project_id'])) continue;
-            if ($rule['inactive___1'] == '1') continue;
-
-
-            if ($rule['username'] === $this->username AND $rule['project_id'] == $this->project_id) {
-                // Allow based on username and project_id match
-                $this->rule_id = $rule['rule_id'];
-                return true;
-            }
-
-            if ($rule['project_id'] == $this->project_id AND empty($rule['username'])) {
-                // Allow based on project_id
-                $this->rule_id = $rule['rule_id'];
-                return true;
-            }
-
-            if ($rule['username'] === $this->username AND empty($rule['project_id'])) {
-                // Allow based on username role
-                $this->rule_id = $rule['rule_id'];
-                return true;
-            }
-        }
-        return false;
     }
 
 
@@ -499,25 +663,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
-     * Look through all rules to find a matching IP
-     * @return bool
-     */
-    public function validIpAddress() {
-        foreach ($this->rules as $rule) {
-            if ($rule['inactive___1'] == '1') continue;
-
-            if (!empty($rule['ip_address'])) {
-                if (self::ipCIDRCheck($rule['ip_address'])) {
-                    $this->rule_id = $rule['rule_id'];
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-
-    /**
      * Load all of the configuration rules
      * @param $pid
      */
@@ -550,6 +695,18 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @throws Exception
      */
     public function loadProjectUsername($token) {
+        list($this->username, $this->project_id) = $this->getUserProjectFromToken($token);
+        $this->emDebug("Token belongs " . $this->username . " / pid " . $this->project_id);
+    }
+
+
+    /**
+     * Fetch user information from corresponding API token
+     * @param String $token
+     * @return array [username, project_id]
+     * @throws Exception
+     */
+    public function getUserProjectFromToken($token){
         $sql = "
             SELECT username, project_id 
             FROM redcap_user_rights
@@ -559,24 +716,13 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token" );
         } else {
             $row = db_fetch_assoc($q);
-            $this->username = $row['username'];
-            $this->project_id = $row['project_id'];
+            return array($row['username'], $row['project_id']);
         }
-        $this->emDebug("Token belongs " . $this->username . " / pid " . $this->project_id);
     }
 
 
-
-
-
-
-
-
-
-
-
     /**
-     * Is this an API request
+     * Check if valid API request
      * @return bool
      */
     static function isApiRequest() {
@@ -591,17 +737,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @return bool
      */
     public function ipCIDRCheck ($CIDR) {
-        $ip = $this->ip;
+        $IP = $this->ip;
         if(strpos($CIDR, "/") === false) $CIDR .= "/32";
-        list ($net, $mask) = explode("/", $CIDR);
-        $ip_net  = ip2long($net);
+        list ($net, $mask) = explode ('/', $CIDR);
+        $ip_net = ip2long ($net);
         $ip_mask = ~((1 << (32 - $mask)) - 1);
-        $ip_ip = ip2long($ip);
-        $ip_ip_net = $ip_ip & $ip_mask;
-        return ($ip_ip_net == $ip_net);
+        $ip_ip = ip2long ($IP);
+
+        $this->emError(($ip_ip& $ip_mask), ($ip_net & $ip_mask));
+
+        return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
-
-
-
-
 }
