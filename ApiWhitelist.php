@@ -89,7 +89,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $this->setSystemSetting('first-time-setup',0);
         $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, 1);
         $this->setSystemSetting('whitelist-logging-option','1');
-
     }
 
     /**
@@ -225,8 +224,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             'ip'    => $this->ip,
             'project_id' => $this->project_id)
         );
-
-
     }
 
 
@@ -238,8 +235,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @throws Exception
      */
     function validateSetup($quick_check = false) {
-
-
         // Quick Check
         if ($quick_check) {
             // Let's just look at the KEY_VALID_CONFIGURATION setting
@@ -248,15 +243,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 return false;
             }
         }
-
         // Do a thorough check
         // Verify that the module is set up correctly
         $config_errors = array();
 
-
         // Make sure rejection message is set
         if (empty($this->getSystemSetting(self::KEY_REJECTION_MESSAGE))) $config_errors[] = "Missing rejection message in module setup";
-
 
         // Make sure configuration project is set
         $this->config_pid = $this->getSystemSetting(self::KEY_CONFIG_PID);
@@ -276,13 +268,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             if (!empty($missing)) $config_errors[] = "The API Whitelist project (#$this->config_pid) is missing required fields: " . implode(", ", $missing);
         }
 
-
         // Check for custom log table
         if ($this->getSystemSetting(self::KEY_LOGGING_OPTION) == 1) {
-
             // Make sure we have the custom log table
             if(! $this->tableExists(self::LOG_TABLE)) {
-
                 // Table missing - try to create the table
                 $this->emDebug("Trying to create custom logging table in database: " . self::LOG_TABLE);
                 if (! $this->createLogTable()) {
@@ -305,7 +294,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->emDebug("Custom log table verified");
             }
         }
-
         // Save setup validation to database so we don't have to do this on each api call
         $this->config_valid = empty($config_errors);
         $this->config_errors = $config_errors;
@@ -348,7 +336,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logRequest();
                 break;
             case "REJECT":
-                $this->checkRejectionEmailNotification();
+//                $this->checkRejectionEmailNotification();
                 $this->logRequest();
                 $this->logRejection();
                 $this->checkNotifications();
@@ -363,6 +351,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return;
     }
 
+
     /**
      * Function that dynamically creates and assigns a API whitelist Redcap project
      * @return boolean success
@@ -372,7 +361,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $odmFile = $this->getModulePath() . 'assets/APIWhitelistRulesProject.xml';
         $this->emDebug("ODM FILE",$odmFile);
         $newProjectHelper = new createProjectFromXML($this);
-
         $superToken = $newProjectHelper->getSuperToken(USERID);
 
         if (empty($superToken)) {
@@ -422,7 +410,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->result = "SKIP";
                 return "SKIP";
             }
-
 
             // Get the IP
             $this->ip = trim($_SERVER['REMOTE_ADDR']);
@@ -493,10 +480,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             if($this->ipCIDRCheck(trim($ip)))
                 return true;
         }
-
         return false;
-
     }
+
 
     /**
      * Checks equality between current user and $username
@@ -510,11 +496,11 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         if (empty($this->username)) {
             $this->emError("Unable to parse username from token " . $this->token);
         }
-
         $this->emError($this->username, $username);
 
         return $this->username == $username;
     }
+
 
     /**
      * Checks equality between project and $pid
@@ -533,17 +519,19 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return $this->project_id == $pid;
     }
 
-    function checkRejectionEmailNotification() {
-        // Don't do anything if this isn't enabled
-        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)){
-            return;
-        }
 
-        // If the username is empty - then we can't do anything either
-        if (empty($this->username)){
-            return;
-        }
-    }
+//    function checkRejectionEmailNotification() {
+//        // Don't do anything if this isn't enabled
+//        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)){
+//            return;
+//        }
+//
+//        // If the username is empty - then we can't do anything either
+//        if (empty($this->username)){
+//            return;
+//        }
+//    }
+
 
     /**
      * Log the request according to system settings
@@ -576,7 +564,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 Logging::logEvent("", self::LOG_TABLE, "OTHER", null, $cm, "API Whitelist Request $this->result", "", $this->username, $this->project_id);
                 break;
         }
-
         // Log to EmLogger
         $this->emLog(array(
             "result"     => $this->result,
@@ -713,7 +700,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     }
 
 
-
+    /**
+     * Fetch user information from corresponding API token
+     * @param String $token
+     * @return array [username, project_id]
+     * @throws Exception
+     */
     public function getUserProjectFromToken($token){
         $sql = "
             SELECT username, project_id 
@@ -726,13 +718,11 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             $row = db_fetch_assoc($q);
             return array($row['username'], $row['project_id']);
         }
-
     }
 
 
-
     /**
-     * Is this an API request
+     * Check if valid API request
      * @return bool
      */
     static function isApiRequest() {
@@ -758,8 +748,4 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
         return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
-
-
-
-
 }

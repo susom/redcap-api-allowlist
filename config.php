@@ -64,9 +64,9 @@ if (empty($module->config_pid)) {
     <?php
 
 }
-echo' hello';
-$module->emDebug('inside');
-$module->createAPIWhiteListRulesProject();
+//echo' hello';
+//$module->emDebug('inside');
+//$module->createAPIWhiteListRulesProject();
 
 ?>
 
