@@ -100,7 +100,7 @@
     {
       "key": "whitelist-logging-option",
       "name": "<b>API Whitelist Logging Options</b><br>You can log all api attempts through one of these options:<br><ol><li>No Logging</li><li>Database Table: A new table will be added to your schema that records each api call, the user, the project, ip, and duration.  This is a great way to identify who is using your API and how much 'cpu-time' they are spending.  This is the recommended option.</li><li>REDCap Log Events: this will add to the default logging table for REDCap - it could add a substantial volume over time and is somewhat difficult to parse/query as details will be stored as json object.</li></ol><i>Note: If you install the emLogger EM, you will automatically get logging to file as configured in your emLogger.  You can clear/rotate the log file anytime you like</i>",
-      "required": true,
+      "required": false,
       "type": "radio",
       "choices":[
         {
