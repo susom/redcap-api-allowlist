@@ -10,6 +10,7 @@ if (!SUPER_USER) {
         <h3><span class="glyphicon glyphicon-exclamation-sign"></span> This utility is only available for REDCap Administrators</h3>
     </div>
     <?php
+
     exit();
 }
 
@@ -63,6 +64,9 @@ if (empty($module->config_pid)) {
     <?php
 
 }
+echo' hello';
+$module->emDebug('inside');
+$module->createAPIWhiteListRulesProject();
 
 ?>
 
