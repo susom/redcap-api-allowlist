@@ -380,6 +380,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         // Fix dynamic SQL fields
         $newProjectHelper->convertDyanicSQLField($newProjectID,'username','select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;');
         $newProjectHelper->convertDyanicSQLField($newProjectID,'project_id','select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;');
+
+        // Enable surveys and update instrument
+        $this->query("update redcap_projects set surveys_enabled = 1 where project_id = $newProjectID");
+        $this->query("insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, 'api_whitelist_request', 'API Whitelist Request')");
         return true;
     }
 
@@ -519,18 +523,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return $this->project_id == $pid;
     }
 
-
-//    function checkRejectionEmailNotification() {
-//        // Don't do anything if this isn't enabled
-//        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)){
-//            return;
-//        }
-//
-//        // If the username is empty - then we can't do anything either
-//        if (empty($this->username)){
-//            return;
-//        }
-//    }
 
 
     /**
@@ -673,6 +665,97 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
+     * Backend endpoint for dataTable ajax
+     * @param $timePartition : 'hour' || 'day', || 'month' || 'year' || 'all'
+     * @return payload 2D array: [
+     *  [Project-ID, Included IPs, Duration, Pass, Rejecct, Error]
+     *  [] ...
+     * ]
+     **/
+    function fetchDataTableInfo($timePartition){
+        if($timePartition === "ALL")
+            $sql = "Select * from redcap.redcap_log_api_whitelist";
+        else
+            $sql = "Select * from redcap.redcap_log_api_whitelist where ts>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
+        $result = $this->query($sql);
+//        $this->emLog($result);
+
+        $payload = array();
+        $payload['data'] = array();
+
+        //Tables for efficiency, 1 iteration only
+        $indexTable = []; //keeps track of project IDs
+        $ipTable = []; //keeps track of IPs
+        foreach($result as $index => $row){
+            $ar = [];
+            $key = array_search($row['project_id'], $indexTable); //check if project ID has been seen before
+            if($key === false){ //if project id hasn't been pushed to payload
+                $ipTable = [];
+                array_push($indexTable, $row['project_id']); //add to indexTable, KEY = Payload index
+                array_push($ipTable, $row['ip_address']);
+                array_push($ar, $row['project_id'], $row['ip_address'], $row['duration']);
+
+                if($row['result'] === 'PASS'){ //Count value for each type
+                    array_push($ar, 1,0,0);
+                }elseif($row['result'] === 'REJECT'){
+                    array_push($ar, 0,1,0);
+                }else{
+                    array_push($ar, 0,0,1);
+                }
+
+                array_push($payload['data'], $ar);
+
+            }else{ //project ID exists, increment payload information
+                $payload['data'][$key][2] += $row['duration']; //column 2 will always be duration
+
+                if($row['result'] === 'PASS'){
+                    $payload['data'][$key][3]++;
+                } elseif($row['result'] === 'REJECT'){
+                    $payload['data'][$key][4]++;
+                }else{
+                    $payload['data'][$key][5]++;
+                }
+            }
+
+//            $ip = array_search($row['ip_address'], $ipTable); //check if ip address has been seen before
+            $ip = in_array($row['ip_address'], $ipTable);
+            if(!$ip){
+//                $this->emLog($row['ip_address'], $ipTable);
+                if($row['ip_address'] === "")
+                    $concat = ", " . "none";
+                else
+                    $concat = ", " . $row['ip_address'];
+                $payload['data'][$key][1] .= $concat;
+                array_push($ipTable, $row['ip_address']);
+            }
+
+//            $this->emLog($payload);
+        }
+//        $this->emLog($ipTable);
+
+//        $this->emLog($payload);
+        return $payload;
+    }
+
+//    function fetchRecentRecords(){
+//        $sql = "Select * from redcap.redcap_log_api_whitelist ORDER BY ts";
+//        $result = $this->query($sql);
+//        $this->emLog('her4');
+//        $this->loadRules($this->getSystemSetting(self::KEY_CONFIG_PID));
+//        $this->emLog('pid key', $this->getSystemSetting(self::KEY_CONFIG_PID));
+//        $this->emLog($this->$rules);
+//        foreach ($result as $index => $row){
+//            $this->emLog($row);
+//        }
+//        return "none";
+//    }
+//
+//    function consolidateRecords(){
+//
+//    }
+
+
+    /**
      * Get the token from the query
      * @return string
      * @throws Exception
@@ -748,4 +831,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
         return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
+
+
 }

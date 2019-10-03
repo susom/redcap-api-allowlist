@@ -3,7 +3,11 @@ namespace Stanford\ApiWhitelist;
 /** @var \Stanford\ApiWhitelist\ApiWhitelist $module */
 
 require APP_PATH_DOCROOT . "ControlCenter/header.php";
+?>
 
+
+<?
+echo $module;
 if (!SUPER_USER) {
     ?>
     <div class="jumbotron text-center">
@@ -69,13 +73,42 @@ if (empty($module->config_pid)) {
 //$module->createAPIWhiteListRulesProject();
 
 ?>
-
+    <script src="<?php echo $module->getUrl('js/configDataTable.js') ?>"></script>
     <hr>
     <h6>Troubleshooting</h6>
     <p>
         If you are interested in using the local database option but running into troubles, the following is the SQL you should run with a user that has create table rights:
     <pre class="m-3"><code><?php echo str_replace("            ","",$module->createLogTableSql()) ?></code></pre>
     </p>
+    <hr>
+
+    <h5>Cumulative API Request Results</h5>
+    <p class="d-inline">Query results by </p>
+    <select class ="d-inline" id = "partition">
+        <option value = 'HOUR'>Hour</option>
+        <option value = "DAY">Day</option>
+        <option value = "WEEK">Week</option>
+        <option value = "MONTH">Month</option>
+        <option value= "YEAR">Year</option>
+        <option selected = "selected" value ="ALL">All-time</option>
+    </select>
+    <br>
+    <br>
+
+    <table class="dataTable" >
+        <thead>
+        <tr>
+            <th scope="col">Project ID</th>
+            <th scope="col">Included IPs</th>
+            <th scope="col">Duration</th>
+            <th scope="col">Pass</th>
+            <th scope="col">Reject</th>
+            <th scope="col">Error</th>
+        </tr>
+        </thead>
+    </table>
+
+    <input type="hidden" id="ApiWhitelistEndpoint" value="<?php echo $module->getUrl('routes.php'); ?>" class="hidden"/>
 
 </div>
 
