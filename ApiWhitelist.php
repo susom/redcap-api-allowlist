@@ -679,12 +679,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * ]
      **/
     function fetchDataTableInfo($timePartition){
-        if($timePartition === "ALL")
-            $sql = "Select * from redcap.redcap_log_api_whitelist";
-        else
-            $sql = "Select * from redcap.redcap_log_api_whitelist where ts>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
+        if($timePartition === "ALL"){
+            $sql = "Select * from redcap_log_api_whitelist";
+        } else {
+            $sql = "Select * from redcap_log_api_whitelist where ts>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
+        }
+        $this->emDebug($sql);
+
         $result = $this->query($sql);
-//        $this->emLog($result);
+        $this->emDebug($result);
 
         $payload = array();
         $payload['data'] = array();

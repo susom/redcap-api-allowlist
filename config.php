@@ -63,6 +63,14 @@ if (empty($module->config_pid)) {
 
     <?php
 
+}else{
+    //build link to main page
+    $url = substr(APP_PATH_WEBROOT_FULL,0,-1);
+    $url .=  (APP_PATH_WEBROOT . 'ProjectSetup/index.php?pid=' . $module->config_pid);
+    ?>
+    <button class = 'btn btn-primary' onclick="location.href='<?php echo $url ?>'">Project Home</button>
+
+    <?php
 }
 //echo' hello';
 //$module->emDebug('inside');
