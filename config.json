@@ -64,38 +64,62 @@
       "required": false,
       "type": "project-id",
       "source": "js/api_whitelist.js",
-      "functionName": "ApiWhitelist.config"
+      "functionName": "ApiWhitelist.config",
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "rejection-message",
       "name": "<b>Rejection Help Message</b><br>When a request does not match a whitelist rule, the user will receive a 403 response and the text entered here.<br>For example, you might give directions to a survey to request an exception:<div class='m3'>API Access Requires Approval<br>In order to use this API from your current network, you must request permission by completing this form:  https://link.to.your.survey",
-      "required": true,
-      "type": "textarea"
+      "required": false,
+      "type": "textarea",
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "rejection-email-notification",
       "name": "<b>Notify Rejected Users</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per hour will be sent.",
       "required": false,
-      "type": "checkbox"
+      "type": "checkbox",
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "rejection-email-header",
       "name": "<b>Rejection Email Header</b><br>This field will be included in the email for rejected API requests",
       "required": false,
-      "type": "rich-text"
+      "type": "rich-text",
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "rejection-email-from-address",
       "name": "<b>Rejection Email From Address</b><br>(e.g. no-reply@myredcap.com or help@myredcap.com)",
       "required": false,
-      "type": "email"
+      "type": "email",
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "configuration-validation-errors",
       "name": "",
       "required": false,
       "readonly": true,
-      "type": "text"
+      "type": "text",
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "whitelist-logging-option",
@@ -115,7 +139,11 @@
           "name" : "2. REDCap Event Logging",
           "value" : "2"
         }
-      ]
+      ],
+      "branchingLogic" : {
+        "field": "first-time-setup",
+        "value": "0"
+      }
     },
     {
       "key": "enable-system-debug-logging",

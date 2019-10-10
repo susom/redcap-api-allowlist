@@ -388,7 +388,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
         $sql = "insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, 'api_whitelist_request', 'API Whitelist Request')";
         $result = $this->query($sql);
-        $this->query($sql, $result);
+        $this->emDebug($sql, $result);
 
         return true;
     }

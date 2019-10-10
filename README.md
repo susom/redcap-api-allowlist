@@ -15,6 +15,12 @@ A REDCap database table is created as well for this module that is used for logg
 
 
 ## FAQ
+Administrators : Navigate to the control center and enable the API Whitelist module after clicking the External Modules link on the
+left sidebar under Technical / Developer tools.
+
+Clicking configure and checking the `First Time Setup` checkbox will create a new `API Whitelist EM Rules`
+project and default the rest of the options on the configuration page. Clicking this option will also enable surveys within
+the project.
 
 #### What kinds of whitelist exceptions can I create?
 - You can allow access by network IP range.  This uses CIDR notation so you can whitelist an entire block of addresses easily.
@@ -22,6 +28,7 @@ A REDCap database table is created as well for this module that is used for logg
 - You can allow access by user/project - this will allow only certain users from specific projects to access the API
 
 
- ## TODO:
+## Recent updates:
  
- 
+- Updated config.json to include branching logic on configuration page on first time setup
+- 
