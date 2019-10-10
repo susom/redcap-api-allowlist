@@ -378,12 +378,18 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $this->setSystemSetting('config-pid', $newProjectID);
 
         // Fix dynamic SQL fields
-        $newProjectHelper->convertDyanicSQLField($newProjectID,'username','select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;');
         $newProjectHelper->convertDyanicSQLField($newProjectID,'project_id','select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;');
 
-        // Enable surveys and update instrument
-        $this->query("update redcap_projects set surveys_enabled = 1 where project_id = $newProjectID");
-        $this->query("insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, 'api_whitelist_request', 'API Whitelist Request')");
+        // Enable surveicSQLField($newProjectID,'username','select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;');
+        //        $newProjectHelper->convertDyanys and update instrument
+        $sql = "update redcap_projects set surveys_enabled = 1 where project_id = $newProjectID";
+        $result = $this->query($sql);
+        $this->emDebug($sql, $result);
+
+        $sql = "insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, 'api_whitelist_request', 'API Whitelist Request')";
+        $result = $this->query($sql);
+        $this->query($sql, $result);
+
         return true;
     }
 
