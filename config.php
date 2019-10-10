@@ -3,11 +3,7 @@ namespace Stanford\ApiWhitelist;
 /** @var \Stanford\ApiWhitelist\ApiWhitelist $module */
 
 require APP_PATH_DOCROOT . "ControlCenter/header.php";
-?>
 
-
-<?
-echo $module;
 if (!SUPER_USER) {
     ?>
     <div class="jumbotron text-center">
