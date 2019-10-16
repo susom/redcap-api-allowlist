@@ -73,36 +73,52 @@ $url .=  (APP_PATH_WEBROOT . 'ProjectSetup/index.php?pid=' . $module->config_pid
     $logOption = $module->getSystemSetting('whitelist-logging-option');
     if( $logOption == 1){
 ?>
-    <script src="<?php echo $module->getUrl('js/configDataTable.js') ?>"></script>
-    <h5>Cumulative API Request Results</h5>
-    <p class="d-inline">Query results by </p>
-    <select class ="d-inline" id = "partition">
-        <option value = 'HOUR'>Hour</option>
-        <option value = "DAY">Day</option>
-        <option value = "WEEK">Week</option>
-        <option value = "MONTH">Month</option>
-        <option value= "YEAR">Year</option>
-        <option selected = "selected" value ="ALL">All-time</option>
-    </select>
-    <br>
-    <br>
-
-    <table class="dataTable" >
-        <thead>
-        <tr>
-            <th scope="col">Rule ID</th>
-            <th scope="col">Included IPs</th>
-            <th scope="col">Duration</th>
-            <th scope="col">Pass</th>
-            <th scope="col">Reject</th>
-            <th scope="col">Error</th>
-        </tr>
-        </thead>
-    </table>
-<!--    <a href="--><?php //echo $module->getURL('reports/stats.php'); ?><!--">Test</a>-->
-    <input type="hidden" id="ApiWhitelistEndpoint" value="<?php echo $module->getUrl('routes.php'); ?>" class="hidden"/>
-    <button class = 'btn btn-sm btn-primary' onclick="location.href='<?php echo $module->getURL('reports/stats.php'); ?>'">View more statistics</button><hr>
+    <div>
+        <p>For a succinct table visualization for common API usage statistics please enable the admin dashboard external module and configure a new report</p>
+        <p>Here are some example queries that may be helpful during configuration:</p>
+        <ol>
+            <li>
+                <p>Cumulative API response duration by project/rule</p>
+                <code>SELECT SUM(duration), project_id, rule_id FROM redcap_log_api_whitelist group by rule_id, project_id ORDER BY SUM(duration) desc </code>
+            </li>
+            <li>
+                <p>Most recent whitelist rejections</p>
+                <code>SELECT project_id, ip_address, ts, comment FROM redcap_log_api_whitelist WHERE rule_id IS NULL order by ts desc</code>
+            </li>
+        </ol>
+    </div>
+    <hr>
 <?php
+/*
+
+//<script src="<?php echo $module->getUrl('js/configDataTable.js') ?>"></script>*/
+//    <h5>Cumulative API Request Results</h5>
+//    <p class="d-inline">Query results by </p>
+//    <select class ="d-inline" id = "partition">
+//        <option value = 'HOUR'>Hour</option>
+//        <option value = "DAY">Day</option>
+//        <option value = "WEEK">Week</option>
+//        <option value = "MONTH">Month</option>
+//        <option value= "YEAR">Year</option>
+//        <option selected = "selected" value ="ALL">All-time</option>
+//    </select>
+//    <br>
+//    <br>
+//
+//    <table class="dataTable" >
+//        <thead>
+//        <tr>
+//            <th scope="col">Rule ID</th>
+//            <th scope="col">Included IPs</th>
+//            <th scope="col">Duration</th>
+//            <th scope="col">Pass</th>
+//            <th scope="col">Reject</th>
+//            <th scope="col">Error</th>
+//        </tr>
+//        </thead>
+//    </table>
+/*    <a href="<?php echo $module->getURL('reports/stats.php'); ?>">Test</a>*/
+
     }
 ?>
 
