@@ -5,17 +5,18 @@ namespace Stanford\ApiWhitelist;
 
 /**
  * AJAX endpoint for datatable on Config page
- *
- * @returns list of items formatted for datatable
+ * @params :
+ *  $timepartition = ("ALL" || "YEAR" || "MONTH" || "WEEK" || "DAY" || "HOUR")
+ *  $task = ("ruleTable" || "notificationTable" || "baseTable")
+ * @returns list of items formatted for datatable use
  */
-if(isset($_POST)){
-    $timePartition = $_POST['filter'];
-    if(isset($timePartition)){
-        $payload = $module->fetchDataTableInfo($timePartition);
-        echo json_encode($payload);
-    } else {
-        $module->emLog('DataTables has returned an empty filter response');
 
-    }
+$timePartition = isset($_POST['filter']) ? $_POST['filter'] : null;
+$task = isset($_POST['task']) ? $_POST['task'] : null;
+
+if($task && $timePartition){
+    $payload = $module->fetchDataTableInfo($task, $timePartition);
+    echo json_encode($payload);
+}else {
+    $module->emError('AJAX request returned an empty filter or task response');
 }
-
