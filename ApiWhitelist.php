@@ -604,14 +604,14 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             username = '%s',
             project_id = %d,
             result = '%s',
-            rule_id = %d,
+            rule_id = %s,
             comment = '%s'",
             db_real_escape_string(self::LOG_TABLE),
             db_real_escape_string($this->ip),
             db_real_escape_string($this->username),
             db_real_escape_string($this->project_id),
             db_real_escape_string($this->result),
-            db_real_escape_string($this->rule_id),
+            db_real_escape_string(empty($this->rule_id) ? "NULL" : $this->rule_id),
             db_real_escape_string($comment)
         );
         db_query($sql);
@@ -691,97 +691,128 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
-     * Backend endpoint for dataTable ajax
-     * @param $timePartition : 'hour' || 'day', || 'month' || 'year' || 'all'
-     * @return payload 2D array: [
-     *  [Project-ID, Included IPs, Duration, Pass, Rejecct, Error]
-     *  [] ...
+     * Backend endpoint for dataTable ajax, 3 in total
+     * @params :
+     *  $timepartition = ("ALL" || "YEAR" || "MONTH" || "WEEK" || "DAY" || "HOUR")
+     *  $task = ("ruleTable" || "notificationTable" || "baseTable")
+     * @return payload 2D array in the datatable format:
+     * payload = [
+     *  data = [[],[], ...]
      * ]
      **/
-    function fetchDataTableInfo($timePartition){
-        if($timePartition === "ALL"){
-            $sql = "Select * from redcap_log_api_whitelist";
-        } else {
-            $sql = "Select * from redcap_log_api_whitelist where ts>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
-        }
-        $this->emDebug($sql);
+    function fetchDataTableInfo($task, $timePartition){
+        if($task === 'ruleTable'){ //on reports page
+            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_log_api_whitelist"); //query data depending on time selection
+            $payload = array();
+            $payload['data'] = array();
+            $ruleTable = array(); //lookup table to determine index to update upon non-unique encounter
 
-        $result = $this->query($sql);
-        $this->emDebug($result);
+            foreach($result as $i=> $row){
+                $ar = [];
+                if(!in_array($row['rule_id'],$ruleTable)){ //If rule has not been encountered
+                    $rule_id = isset($row['rule_id']) ? $row['rule_id'] : "None"; //Replace empty rules with "none" in DT
+                    array_push($ar, $rule_id, $row['project_id'], $row['duration']);
+                    array_push($ruleTable, $row['rule_id']); //key is the index of payload
+                    array_push($payload['data'], $ar);
 
-        $payload = array();
-        $payload['data'] = array();
-
-        //Tables for efficiency, 1 iteration only
-        $indexTable = []; //keeps track of project IDs
-        $ipTable = []; //keeps track of IPs
-        foreach($result as $index => $row){
-            $ar = [];
-            $key = array_search($row['project_id'], $indexTable); //check if project ID has been seen before
-            if($key === false){ //if project id hasn't been pushed to payload
-                $ipTable = [];
-                array_push($indexTable, $row['project_id']); //add to indexTable, KEY = Payload index
-                array_push($ipTable, $row['ip_address']);
-                array_push($ar, $row['project_id'], $row['ip_address'], $row['duration']);
-
-                if($row['result'] === 'PASS'){ //Count value for each type
-                    array_push($ar, 1,0,0);
-                }elseif($row['result'] === 'REJECT'){
-                    array_push($ar, 0,1,0);
                 }else{
-                    array_push($ar, 0,0,1);
+                    $index = array_search($row['rule_id'],$ruleTable);
+                    $payload['data'][$index][2] += $row['duration']; //third index is always duration.
                 }
+            }
+            return $payload;
+        }else if($task === 'notificationTable'){ //on reports page
+            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_external_modules_log");
+            $payload = array();
+            $payload['data'] = array();
 
+            foreach($result as $i => $row){
+                $ar = [];
+                array_push($ar, $row['timestamp'], $row['project_id'], $row['value']);
                 array_push($payload['data'], $ar);
+            }
+            return $payload;
 
-            }else{ //project ID exists, increment payload information
-                $payload['data'][$key][2] += $row['duration']; //column 2 will always be duration
+        }else{ //main table based on Rule ID
+            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_log_api_whitelist");
+            $this->emDebug($result);
 
-                if($row['result'] === 'PASS'){
-                    $payload['data'][$key][3]++;
-                } elseif($row['result'] === 'REJECT'){
-                    $payload['data'][$key][4]++;
-                }else{
-                    $payload['data'][$key][5]++;
+            $payload = array();
+            $payload['data'] = array();
+
+            //Tables for efficiency, 1 iteration only
+            $indexTable = []; //keeps track of rule IDs
+            $ipTable = []; //keeps track of IPs
+            foreach($result as $index => $row){
+                $ar = [];
+                $key = array_search($row['rule_id'], $indexTable); //check if rule ID has been seen before
+                if($key === false){ //if project id hasn't been pushed to payload
+                    $ipTable = [];
+                    array_push($indexTable, $row['rule_id']); //add to indexTable, KEY = Payload index
+                    array_push($ipTable, $row['ip_address']);
+                    array_push($ar, $row['rule_id'], $row['ip_address'], $row['duration']);
+
+                    if($row['result'] === 'PASS'){ //Count value for each type
+                        array_push($ar, 1,0,0);
+                    }elseif($row['result'] === 'REJECT'){
+                        array_push($ar, 0,1,0);
+                    }else{
+                        array_push($ar, 0,0,1);
+                    }
+
+                    array_push($payload['data'], $ar);
+
+                }else{ //rule ID exists, increment payload information
+                    $payload['data'][$key][2] += $row['duration']; //column 2 will always be duration
+
+                    if($row['result'] === 'PASS'){
+                        $payload['data'][$key][3]++;
+                    } elseif($row['result'] === 'REJECT'){
+                        $payload['data'][$key][4]++;
+                    }else{
+                        $payload['data'][$key][5]++;
+                    }
+                }
+
+                $ip = in_array($row['ip_address'], $ipTable); //check if IP address has been encountered
+                if(!$ip){
+                    if($row['ip_address'] === "")
+                        $concat = ", " . "none";
+                    else
+                        $concat = ", " . $row['ip_address'];
+                    $payload['data'][$key][1] .= $concat;
+                    array_push($ipTable, $row['ip_address']);
                 }
             }
-
-//            $ip = array_search($row['ip_address'], $ipTable); //check if ip address has been seen before
-            $ip = in_array($row['ip_address'], $ipTable);
-            if(!$ip){
-//                $this->emLog($row['ip_address'], $ipTable);
-                if($row['ip_address'] === "")
-                    $concat = ", " . "none";
-                else
-                    $concat = ", " . $row['ip_address'];
-                $payload['data'][$key][1] .= $concat;
-                array_push($ipTable, $row['ip_address']);
-            }
-
-//            $this->emLog($payload);
+            return $payload;
         }
-//        $this->emLog($ipTable);
-
-//        $this->emLog($payload);
-        return $payload;
     }
 
-//    function fetchRecentRecords(){
-//        $sql = "Select * from redcap.redcap_log_api_whitelist ORDER BY ts";
-//        $result = $this->query($sql);
-//        $this->emLog('her4');
-//        $this->loadRules($this->getSystemSetting(self::KEY_CONFIG_PID));
-//        $this->emLog('pid key', $this->getSystemSetting(self::KEY_CONFIG_PID));
-//        $this->emLog($this->$rules);
-//        foreach ($result as $index => $row){
-//            $this->emLog($row);
-//        }
-//        return "none";
-//    }
-//
-//    function consolidateRecords(){
-//
-//    }
+    /**
+     * Function that grabs data given time and table
+     * @params:
+     *  $timepartition = ("ALL" || "YEAR" || "MONTH" || "WEEK" || "DAY" || "HOUR")
+     *  $location = redcap data table
+     * @return string
+     *
+     */
+    function generateSQLfromTimePartition($timePartition, $location){
+        if($location == 'redcap_external_modules_log'){ //Only join table, must compensate with parameters table
+            if($timePartition === "ALL"){
+                $sql = "SELECT * FROM {$location} JOIN redcap_external_modules_log_parameters remlp on redcap_external_modules_log.log_id = remlp.log_id";
+            } else {
+                $sql = "SELECT * FROM {$location} JOIN redcap_external_modules_log_parameters remlp on redcap_external_modules_log.log_id = remlp.log_id 
+                        where timestamp>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
+            }
+        }else{
+            if($timePartition === "ALL"){
+                $sql = "Select * from {$location}";
+            } else {
+                $sql = "Select * from {$location} where ts>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
+            }
+        }
+        return $this->query($sql);
+    }
 
 
     /**
