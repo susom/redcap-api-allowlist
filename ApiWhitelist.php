@@ -18,7 +18,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     public $project_id;        // request project_id
 
     public $required_whitelist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
-    public $config_valid;      // configuation valid
+    public $config_valid;      // configuration valid
     public $config_errors;     // array of configuration errors
     public $logging_option;    // configured log option
 
@@ -39,22 +39,34 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'config-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
-    const KEY_REJECTION_EMAIL_LOGS       = 'rejection-email-logs';
     const DEFAULT_REJECTION_MESSAGE      = 'This redcap API is restricted using the API whitelist external module. To request an exception for your project, please email HOMEPAGE_CONTACT_EMAIL';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
 
-    public function __construct() {
-        parent::__construct();
-        $this->disableUserBasedSettingPermissions();
-    }
+
+    // public function __construct() {
+    //     parent::__construct();
+    // }
 
 
+    /**
+     * When the module is first enabled on the system level, check for a valid configuration
+     * @param $version
+     */
     function redcap_module_system_enable($version) {
-        $this->validateSetup();
-        $this->emDebug("Module Enabled.  Valid?", $this->config_valid);
+        try {
+            $this->validateSetup();
+            $this->emDebug("Module Enabled.  Valid?", $this->config_valid);
+        } catch (Exception $e) {
+            $this->emError($e->getMessage(), $e->getLine());
+        }
     }
 
 
+    /**
+     * On config chagne, check for setup and update validation setting
+     * @param $project_id
+     * @throws Exception
+     */
     function redcap_module_save_configuration($project_id) {
         $this->checkFirstTimeSetup();
         $this->validateSetup();
@@ -66,30 +78,38 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Update the display of the sidebar link depending on configuration
      * @param $project_id
      * @param $link
-     * @return null
+   git pu  * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
-            // Do nothing - no need to show the link
+            // Do nothing - show default info link
         } else {
             $link['icon'] = "exclamation";
+            $link['name'] = "API Whitelist - Setup Incomplete";
         }
         return $link;
     }
 
+
+    /**
+     * Try to automatically configure the EM by creating a new project
+     * @throws Exception
+     */
     function checkFirstTimeSetup(){
         global $homepage_contact_email;
 
         if($this->getSystemSetting('first-time-setup')){
             $this->createAPIWhiteListRulesProject();
         }
+
         $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
-        $this->emDebug($homepage_contact_email, $rejectionMessage);
+        // $this->emDebug($homepage_contact_email, $rejectionMessage);
         $this->setSystemSetting('rejection-message', $rejectionMessage);
-        $this->setSystemSetting('first-time-setup',0);
+        $this->setSystemSetting('first-time-setup', 0);
         $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, 1);
         $this->setSystemSetting('whitelist-logging-option','1');
     }
+
 
     /**
      * Fetch all users from within the external modules log that have been sent a email notification within

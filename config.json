@@ -37,7 +37,7 @@
   "links": {
     "control-center": [
       {
-        "name": "API Whitelist",
+        "name": "API Whitelist Info",
         "icon": "gear",
         "url": "config.php"
       }
@@ -56,7 +56,11 @@
       "key": "first-time-setup",
       "name": "<b>First Time Setup</b><br>If this is your first time configuring this module, check this box and press save to create a new API rule project and set basic defaults",
       "required": false,
-      "type": "checkbox"
+      "type": "checkbox",
+      "branchingLogic" : {
+        "field": "config-pid",
+        "value": ""
+      }
     },
     {
       "key": "config-pid",
@@ -123,7 +127,7 @@
     },
     {
       "key": "whitelist-logging-option",
-      "name": "<b>API Whitelist Logging Options</b><br>You can log all api attempts through one of these options:<br><ol><li>No Logging</li><li>Database Table: A new table will be added to your schema that records each api call, the user, the project, ip, and duration.  This is a great way to identify who is using your API and how much 'cpu-time' they are spending.  This is the recommended option.</li><li>REDCap Log Events: this will add to the default logging table for REDCap - it could add a substantial volume over time and is somewhat difficult to parse/query as details will be stored as json object.</li></ol><i>Note: If you install the emLogger EM, you will automatically get logging to file as configured in your emLogger.  You can clear/rotate the log file anytime you like</i>",
+      "name": "<b>API Whitelist Logging Options</b><br>You can log all api attempts through one of these options:<br><ol><li>No Logging</li><li>Database Table: A new table will be added to your schema that records each api call, the user, the project, ip, and duration.  This is a great way to identify who is using your API and how much 'cpu-time' they are spending.  This is the recommended option.</li></ol><i>Note: If you install the emLogger EM, you will automatically get logging to file as configured in your emLogger.  You can clear/rotate the log file anytime you like</i>",
       "required": false,
       "type": "radio",
       "choices":[
@@ -134,10 +138,6 @@
         {
           "name" : "1. Custom Table <small><sup>*</sup>Recommended</small>",
           "value" : "1"
-        },
-        {
-          "name" : "2. REDCap Event Logging",
-          "value" : "2"
         }
       ],
       "branchingLogic" : {
