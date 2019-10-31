@@ -1,3 +1,4 @@
+//Script for managing the default page with dataTable
 $(document).ready(() => init());
 
 const init = () => {
@@ -8,7 +9,10 @@ const init = () => {
             "url": url,
             "type": "POST",
             "data": function(){
-               return {filter : $('#partition option:selected').attr('value')};
+                return {
+                    task: 'baseTable',
+                    filter : $('#partition option:selected').attr('value')
+                };
             }
         },
     });
