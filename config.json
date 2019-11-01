@@ -3,7 +3,7 @@
 
   "namespace":"Stanford\\ApiWhitelist",
 
-  "description": "Provides additional restrictions on an otherwise open API",
+  "description": "Secures your REDCap API through use of a 'Whitelist' based on IP address, username, and project.  All non-whitelisted requests will be blocked.",
 
   "versions": [
     { "0.1": "Initial" }
@@ -49,22 +49,29 @@
   "system-settings": [
     {
       "key": "instructions",
-      "name": "<h5><b>Description</b></h5><p>The API Whitelist allows you to restrict API access based on IP address, project, or username.  We use it to allow our internal network to access the API but external IPs require a specific whitelist rule, provided by completion of a survey.</p><p>Examples for whitelist rules are: your VPN network range, a single external server's IP address for a collaborator, or a specific project & user that wants REDCap Mobile access deployed abroad.</p><p>If this is your first time enabling this module, you will have to create the API Whitelist Configuration project.  A template and instructions can be found by clicking on the 'API Whitelist Setup' link on the left sidebar of the control center for instructions.</p><br><div class='alert alert-secondary'><i>This module, once enabled and configured, will apply a filter to all API requests for all projects.</i></div>",
+      "name": "<h5><b>Description</b></h5><p>The API Whitelist inspects all incoming API requests and only permits those that match an API Whitelist Rule.  Rules are stored in an API Whitelist Rules Project and can be constructed based on IP address/range, project, and username.  The Rules project can also be used as an Exception Request survey for your institution users to request a new Rule.</p><p>Examples of whitelist rules are: your VPN network range in CIDR format, a single external server IP address for a collaborator, or a specific project & user that needs to use the REDCap Mobile app from abroad.</p><p>If this is your first time enabling this module, use the 'First Time Setup' to create your rules project.  Additional information is available from the  'API Whitelist Info' link on the left sidebar of the control center.</p><br><div class='alert alert-warning'><i>This module, once enabled and configured, will apply a filter to all API requests for all projects (including the Mobile App).  It DOES NOT filter external module api-urls.</i></div>",
       "type": "descriptive"
     },
     {
       "key": "first-time-setup",
-      "name": "<b>First Time Setup</b><br>If this is your first time configuring this module, check this box and press save to create a new API rule project and set basic defaults",
+      "name": "<b>First Time Setup</b><br>If this is your first time configuring, check this box and press save<br>This will automatically create a new API Whitelist Rules Project",
       "required": false,
       "type": "checkbox",
       "branchingLogic" : {
-        "field": "config-pid",
+        "field": "rules-pid",
         "value": ""
       }
     },
     {
-      "key": "config-pid",
-      "name": "<b>API Whitelist Configuration Project</b><br>This module stores all whitelist rules in a redcap project.  This is how you will add/edit rules once enabled. If you have an existing configuration the default may be replaced",
+      "key": "configuration-validation-errors",
+      "name": "",
+      "required": false,
+      "readonly": true,
+      "type": "text"
+    },
+    {
+      "key": "rules-pid",
+      "name": "<b>API Whitelist Rules Project</b><br>This module stores all whitelist rules in a redcap project.",
       "required": false,
       "type": "project-id",
       "source": "js/api_whitelist.js",
@@ -76,7 +83,7 @@
     },
     {
       "key": "rejection-message",
-      "name": "<b>Rejection Help Message</b><br>When a request does not match a whitelist rule, the user will receive a 403 response and the text entered here.<br>For example, you might give directions to a survey to request an exception:<div class='m3'>API Access Requires Approval<br>In order to use this API from your current network, you must request permission by completing this form:  https://link.to.your.survey",
+      "name": "<b>Rejection Help Message</b><br>When a request does not match a whitelist rule, the user will receive a HTTP 403 response and the text entered here.<br>For example, you might give directions to the public survey url of your whitelist rules project.",
       "required": false,
       "type": "textarea",
       "branchingLogic" : {
@@ -86,7 +93,7 @@
     },
     {
       "key": "rejection-email-notification",
-      "name": "<b>Notify Rejected Users</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per hour will be sent.",
+      "name": "<b>Notify Rejected Users By Email</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per 15 minutes will be sent.",
       "required": false,
       "type": "checkbox",
       "branchingLogic" : {
@@ -100,8 +107,8 @@
       "required": false,
       "type": "rich-text",
       "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
+        "field": "rejection-email-notification",
+        "value": "1"
       }
     },
     {
@@ -110,19 +117,8 @@
       "required": false,
       "type": "email",
       "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
-      }
-    },
-    {
-      "key": "configuration-validation-errors",
-      "name": "",
-      "required": false,
-      "readonly": true,
-      "type": "text",
-      "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
+        "field": "rejection-email-notification",
+        "value": "1"
       }
     },
     {

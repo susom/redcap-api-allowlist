@@ -9,19 +9,42 @@ ApiWhitelist.config = function() {
 
     // Display configuration errors a little differently
     let errors_tr = $('tr[field="configuration-validation-errors"]');
-    //$('input', errors_tr).remove();
-    let errors = JSON.parse($('input', errors_tr).val());
 
-    $.each(errors, function(i, e) {
+    let errors = [];
+
+    try {
+        errors = JSON.parse($('input', errors_tr).val());
+    } catch (err) {
+        // No errors
+    }
+
+    if (errors.length) {
+
+        let error_list = $('<ul/>').css({'margin-bottom':'0'});
+
+        // Add errors
+        $.each(errors, function(i, e) {
+            error_list.append(
+                $('<li/>').html(e)
+            );
+        });
+
+        // Insert errors after errors_tr
         errors_tr.after(
             $('<tr/>').append(
                 $('<td colspan="3">').append(
-                    $('<div/>').addClass('alert alert-danger text-center').html(e)
+                ).append(
+                    $('<div/>').addClass('alert alert-danger text-left').append(
+                        $('<div><b>Configuration Errors</b></div>')
+                    ).append(
+                        error_list
+                    )
                 )
             )
         );
-        console.log(i,e);
-    });
+
+
+    }
 
     setTimeout(function() { $('tr[field="configuration-validation-errors"]').hide() }, 100);
 

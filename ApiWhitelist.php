@@ -32,14 +32,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     public $log_id;            // log_id if last inserted db log
 
     const LOG_TABLE                      = 'redcap_log_api_whitelist';
+    const RULES_SURVEY_FORM_NAME         = 'api_whitelist_request';
     const REQUIRED_WHITELIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'enabled');
     const KEY_LOGGING_OPTION             = 'whitelist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
-    const KEY_CONFIG_PID                 = 'config-pid';
+    const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
-    const DEFAULT_REJECTION_MESSAGE      = 'This redcap API is restricted using the API whitelist external module. To request an exception for your project, please email HOMEPAGE_CONTACT_EMAIL';
+    const DEFAULT_REJECTION_MESSAGE      = 'This REDCap API requires approval.  To request an firewall exception for your project, please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
 
 
@@ -96,19 +97,60 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @throws Exception
      */
     function checkFirstTimeSetup(){
-        global $homepage_contact_email;
-
         if($this->getSystemSetting('first-time-setup')){
-            $this->createAPIWhiteListRulesProject();
-        }
+            $this->emDebug("Setting up First Time Setup");
 
-        $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
-        // $this->emDebug($homepage_contact_email, $rejectionMessage);
-        $this->setSystemSetting('rejection-message', $rejectionMessage);
-        $this->setSystemSetting('first-time-setup', 0);
-        $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, 1);
-        $this->setSystemSetting('whitelist-logging-option','1');
+            global $homepage_contact_email;
+            $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
+
+            $newProjectID = $this->createAPIWhiteListRulesProject();
+            if ($newProjectID > 0) {
+                $url = $this->getRulesPublicSurveyUrl($newProjectID);
+                $this->emDebug("Got survey hash of $url");
+                $rejectionMessage = str_replace('INSERT_SURVEY_URL_HERE', $url, $rejectionMessage);
+
+                $this->setSystemSetting('rejection-message', $rejectionMessage);
+                $this->setSystemSetting('first-time-setup', false);
+                $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, true);
+                $this->setSystemSetting('rejection-email-header', $rejectionMessage);
+                $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
+                $this->setSystemSetting('whitelist-logging-option','1');
+
+            }
+        }
     }
+
+
+    /**
+     * Get the public survey url for the current PID
+     * @param $pid
+     * @return string
+     * @throws Exception
+     */
+    function getRulesPublicSurveyUrl($pid) {
+
+        // Get the survey and event ids in the project
+        $proj = new \Project($pid);
+        $event_id = $proj->firstEventId;
+        $survey_id = $proj->firstFormSurveyId;
+        $this->emDebug($survey_id, $event_id);
+
+        // See if there is a hash yet
+		$sql = "select hash from redcap_surveys_participants where survey_id = $survey_id and event_id = $event_id and participant_email is null";
+		$q = db_query($sql);
+
+		// Hash exists
+		if (db_num_rows($q) > 0) {
+			$hash = db_result($q, 0);
+		}
+		// Create hash
+		else {
+			$hash = \Survey::setHash($survey_id, null, $event_id, null, true);
+		}
+
+        return APP_PATH_SURVEY_FULL . "?s=$hash";
+    }
+
 
 
     /**
@@ -395,22 +437,23 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $this->emDebug('fin', $username, $newProjectID);
 
         // Set the config project id
-        $this->setSystemSetting('config-pid', $newProjectID);
+        $this->setSystemSetting(self::KEY_CONFIG_PID, $newProjectID);
 
         // Fix dynamic SQL fields
         $newProjectHelper->convertDyanicSQLField($newProjectID,'project_id','select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;');
 
-        // Enable surveicSQLField($newProjectID,'username','select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;');
-        //        $newProjectHelper->convertDyanys and update instrument
-        $sql = "update redcap_projects set surveys_enabled = 1 where project_id = $newProjectID";
-        $result = $this->query($sql);
-        $this->emDebug($sql, $result);
+        // Enable Survey
+        // $sql = "update redcap_projects set surveys_enabled = 1 where project_id = $newProjectID";
+        // $result = $this->query($sql);
+        // $this->emDebug($sql, $result);
 
-        $sql = "insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, 'api_whitelist_request', 'API Whitelist Request')";
-        $result = $this->query($sql);
-        $this->emDebug($sql, $result);
+        // Create Survey
+        // $sql = "insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, '" . self::RULES_SURVEY_FORM_NAME . "', 'API Whitelist Request')";
+        // $this->emDebug($sql);
+        // $result = $this->query($sql);
+        // $this->emDebug($result, $newProjectID);
 
-        return true;
+        return $newProjectID;
     }
 
 

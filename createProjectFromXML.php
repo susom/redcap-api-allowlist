@@ -72,8 +72,6 @@ class createProjectFromXML
     }
 
 
-
-
     /**
      * Given API token & Filepath to XML, create Redcap project via POST
      * @param String $token : SuperAPI token
@@ -113,7 +111,7 @@ class createProjectFromXML
                 "odm" => $odm
             );
 
-            $this->module->emDebug('POST TO ' . $url, $package);
+            // $this->module->emDebug('POST TO ' . $url, $package);
             $result = http_post($url,$package, 30);
             $this->module->emDebug($result);
             return $result;
@@ -121,7 +119,6 @@ class createProjectFromXML
         return null;
 
     }
-
 
 
     /**
@@ -134,9 +131,5 @@ class createProjectFromXML
         $this->db->deleteApiTokenSuper(USERID);
         $this->module->emDebug("Deleted temp SuperUser token");
     }
-
-
-
-
 
 }
