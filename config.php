@@ -39,7 +39,7 @@ if ($module->config_valid != 1) {
             <br>
             Return to the EM setup and set the PID to match this newly created project.
             <br>
-            <a href="<?php echo $module->getUrl("docs/api_whitelist_configuration_project.xml") ?>">Download Project XML</a>
+            <a href="<?php echo $module->getUrl("assets/ApiWhitelistRulesProject.xml") ?>">Download Project XML</a>
         </li>
         </ol>
 
