@@ -44,11 +44,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
 
 
-    // public function __construct() {
-    //     parent::__construct();
-    // }
-
-
     /**
      * When the module is first enabled on the system level, check for a valid configuration
      * @param $version
@@ -120,6 +115,14 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         }
     }
 
+    /**
+     * Called Every 15 minutes via cron, determines whether or not to email user with Rejection notices
+     * Runs assuming MIN_EMAIL_RESEND_DURATION, is 15m
+     *
+     */
+    function sendErrorCron(){
+        $this->checkNotifications();
+    }
 
     /**
      * Get the public survey url for the current PID
@@ -401,7 +404,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 //                $this->checkRejectionEmailNotification();
                 $this->logRequest();
                 $this->logRejection();
-                $this->checkNotifications();
+//                $this->checkNotifications(); //commented out to test cron
 
                 header('HTTP/1.0 403 Forbidden');
                 echo $this->getSystemSetting(self::KEY_REJECTION_MESSAGE);
@@ -732,104 +735,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $this->rules = json_decode($q,true);
     }
 
-
-    /**
-     * Backend endpoint for dataTable ajax, 3 in total
-     * @params :
-     *  $timepartition = ("ALL" || "YEAR" || "MONTH" || "WEEK" || "DAY" || "HOUR")
-     *  $task = ("ruleTable" || "notificationTable" || "baseTable")
-     * @return payload 2D array in the datatable format:
-     * payload = [
-     *  data = [[],[], ...]
-     * ]
-     **/
-    function fetchDataTableInfo($task, $timePartition){
-        if($task === 'ruleTable'){ //on reports page
-            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_log_api_whitelist"); //query data depending on time selection
-            $payload = array();
-            $payload['data'] = array();
-            $ruleTable = array(); //lookup table to determine index to update upon non-unique encounter
-
-            foreach($result as $i=> $row){
-                $ar = [];
-                if(!in_array($row['rule_id'],$ruleTable)){ //If rule has not been encountered
-                    $rule_id = isset($row['rule_id']) ? $row['rule_id'] : "None"; //Replace empty rules with "none" in DT
-                    array_push($ar, $rule_id, $row['project_id'], $row['duration']);
-                    array_push($ruleTable, $row['rule_id']); //key is the index of payload
-                    array_push($payload['data'], $ar);
-
-                }else{
-                    $index = array_search($row['rule_id'],$ruleTable);
-                    $payload['data'][$index][2] += $row['duration']; //third index is always duration.
-                }
-            }
-            return $payload;
-        }else if($task === 'notificationTable'){ //on reports page
-            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_external_modules_log");
-            $payload = array();
-            $payload['data'] = array();
-
-            foreach($result as $i => $row){
-                $ar = [];
-                array_push($ar, $row['timestamp'], $row['project_id'], $row['value']);
-                array_push($payload['data'], $ar);
-            }
-            return $payload;
-
-        }else{ //main table based on Rule ID
-            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_log_api_whitelist");
-            $this->emDebug($result);
-
-            $payload = array();
-            $payload['data'] = array();
-
-            //Tables for efficiency, 1 iteration only
-            $indexTable = []; //keeps track of rule IDs
-            $ipTable = []; //keeps track of IPs
-            foreach($result as $index => $row){
-                $ar = [];
-                $key = array_search($row['rule_id'], $indexTable); //check if rule ID has been seen before
-                if($key === false){ //if project id hasn't been pushed to payload
-                    $ipTable = [];
-                    array_push($indexTable, $row['rule_id']); //add to indexTable, KEY = Payload index
-                    array_push($ipTable, $row['ip_address']);
-                    array_push($ar, $row['rule_id'], $row['ip_address'], $row['duration']);
-
-                    if($row['result'] === 'PASS'){ //Count value for each type
-                        array_push($ar, 1,0,0);
-                    }elseif($row['result'] === 'REJECT'){
-                        array_push($ar, 0,1,0);
-                    }else{
-                        array_push($ar, 0,0,1);
-                    }
-
-                    array_push($payload['data'], $ar);
-
-                }else{ //rule ID exists, increment payload information
-                    $payload['data'][$key][2] += $row['duration']; //column 2 will always be duration
-
-                    if($row['result'] === 'PASS'){
-                        $payload['data'][$key][3]++;
-                    } elseif($row['result'] === 'REJECT'){
-                        $payload['data'][$key][4]++;
-                    }else{
-                        $payload['data'][$key][5]++;
-                    }
-                }
-
-                $ip = in_array($row['ip_address'], $ipTable); //check if IP address has been encountered
-                if(!$ip){
-                    if($row['ip_address'] === "")
-                        $concat = ", " . "none";
-                    else
-                        $concat = ", " . $row['ip_address'];
-                    $payload['data'][$key][1] .= $concat;
-                    array_push($ipTable, $row['ip_address']);
-                }
-            }
-            return $payload;
-        }
-    }
 
     /**
      * Function that grabs data given time and table
