@@ -17,6 +17,9 @@ as a 'request' survey for users the request access to the API.
 
 Upon activation of this module, a new database table will be created to log all API access.  The table is 
 called 'redcap_log_api_whitelist'. 
+##Rejection Notifications
+When an API request is rejected, in addition to the 403 message specified in the module configuration, the token owner wilil recieve
+an email summarizing the rejections. Users will recieve a maximum of one email every 15 minutes regardless of the amount of rejected requests.
 
 ## Viewing API Activity
 The API Whitelist Info page from the control center provides example SQL queries you can use to view API activity.

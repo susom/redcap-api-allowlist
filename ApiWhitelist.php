@@ -40,13 +40,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
-    const DEFAULT_REJECTION_MESSAGE      = 'This REDCap API requires approval.  To request an firewall exception for your project, please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
+    const DEFAULT_REJECTION_MESSAGE      = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
-
-
-    // public function __construct() {
-    //     parent::__construct();
-    // }
 
 
     /**
@@ -79,7 +74,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Update the display of the sidebar link depending on configuration
      * @param $project_id
      * @param $link
-     * @return null
+   git pu  * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
@@ -120,6 +115,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         }
     }
 
+    /**
+     * Called Every 15 minutes via cron, determines whether or not to email user with Rejection notices
+     * Runs assuming MIN_EMAIL_RESEND_DURATION, is 15m
+     *
+     */
+    function cronRejectionNotifications(){
+        $this->checkNotifications();
+    }
+
 
     /**
      * Get the public survey url for the current PID
@@ -139,6 +143,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 		$sql = "select hash from redcap_surveys_participants where survey_id = $survey_id and event_id = $event_id and participant_email is null";
 		$q = db_query($sql);
 
+		// Hash exists
 		if (db_num_rows($q) > 0) {
     		// Hash exists
 			$hash = db_result($q, 0);
@@ -146,6 +151,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     		// Create hash
 			$hash = \Survey::setHash($survey_id, null, $event_id, null, true);
 		}
+
         return APP_PATH_SURVEY_FULL . "?s=$hash";
     }
 
@@ -178,7 +184,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @param null $userFilter
      * @return 2d array, each rejection row indexed by user
      */
-    function getRejectionNotifications($userFilter = null) {
+    function getRejections($userFilter = null) {
         $sql = "select log_id, timestamp, ip, project_id, user where message = 'REJECT'";
         $q = $this->queryLogs($sql);
         $payload = array();
@@ -211,17 +217,18 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $filter = $this->getRecentlyNotifiedUsers();
         //fetch users that have already been notified within the threshold period
 
-        $notifications = ($this->getRejectionNotifications($filter));
+        $rejections = ($this->getRejections($filter));
         //fetch all rejection messages, grouped by user
-
-        if(!empty($notifications)) {
+        $this->emDebug($rejections);
+        if(!empty($rejections)) {
             $header = $this->getSystemSetting('rejection-email-header');
             $rejectionEmailFrom = $this->getSystemSetting('rejection-email-from-address');
             if(!empty($rejectionEmailFrom)) {
-                foreach($notifications as $user => $rows){
+                foreach($rejections as $user => $rows){
                     $logIds = array();
-                    $sql = "SELECT user_email from  redcap_user_information where username = '" . db_real_escape_string($this->username) . "'";
+                    $sql = "SELECT user_email from redcap_user_information where username = '" . db_real_escape_string($user) . "'";
                     $q = $this->query($sql);
+                    $this->emDebug($sql, $q);
                     $email = db_result($q,0);
                     //fetch the first col in the returned row
 
@@ -240,7 +247,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     }
                     $table .= "</tbody></table>";
                     $messageBody = $header . "<hr>" . $table;
+                    $this->emDebug($email, $rejectionEmailFrom, $messageBody);
                     $emailResult = REDCap::email($email,$rejectionEmailFrom,'API whitelist rejection notice', $messageBody);
+
+                    $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
 
@@ -409,7 +419,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->exitAfterHook();     // Prevent API code from executing
                 break;
             default:
-                // In event of errors, API request is allowed
                 $this->emError("Unexpected result from screenRequest: ", $this->result);
         }
         return;
@@ -625,7 +634,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 Logging::logEvent("", self::LOG_TABLE, "OTHER", null, $cm, "API Whitelist Request $this->result", "", $this->username, $this->project_id);
                 break;
         }
-
         // Log to EmLogger
         $this->emDebug(array(
             "result"     => $this->result,
@@ -690,7 +698,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $q = db_query("SELECT 1 FROM " . db_real_escape_string($table_name) . " LIMIT 1");
         return !($q === FALSE);
     }
-
 
     /**
      * Create the custom log table
