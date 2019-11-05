@@ -35,10 +35,10 @@
   ],
   "crons": [
     {
-      "cron_name": "send_errors",
-      "cron_description": "Cron that runs every 15 minutes to email users API rejections if valid",
-      "method": "sendErrorCron",
-      "cron_frequency": "900",
+      "cron_name": "rejection_notifiation_emails",
+      "cron_description": "Cron that runs every 10 minutes to email users' API rejections if valid",
+      "method": "cronRejectionNotifications",
+      "cron_frequency": "600",
       "cron_max_run_time": "60"
     }
   ],

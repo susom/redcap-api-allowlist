@@ -40,7 +40,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
-    const DEFAULT_REJECTION_MESSAGE      = 'This REDCap API requires approval.  To request an firewall exception for your project, please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
+    const DEFAULT_REJECTION_MESSAGE      = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
 
 
@@ -120,9 +120,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Runs assuming MIN_EMAIL_RESEND_DURATION, is 15m
      *
      */
-    function sendErrorCron(){
+    function cronRejectionNotifications(){
         $this->checkNotifications();
     }
+
 
     /**
      * Get the public survey url for the current PID
@@ -183,7 +184,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @param null $userFilter
      * @return 2d array, each rejection row indexed by user
      */
-    function getRejectionNotifications($userFilter = null) {
+    function getRejections($userFilter = null) {
         $sql = "select log_id, timestamp, ip, project_id, user where message = 'REJECT'";
         $q = $this->queryLogs($sql);
         $payload = array();
@@ -215,17 +216,18 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $filter = $this->getRecentlyNotifiedUsers();
         //fetch users that have already been notified within the threshold period
 
-        $notifications = ($this->getRejectionNotifications($filter));
+        $rejections = ($this->getRejections($filter));
         //fetch all rejection messages, grouped by user
-
-        if(!empty($notifications)) {
+        $this->emDebug($rejections);
+        if(!empty($rejections)) {
             $header = $this->getSystemSetting('rejection-email-header');
             $rejectionEmailFrom = $this->getSystemSetting('rejection-email-from-address');
             if(!empty($rejectionEmailFrom)) {
-                foreach($notifications as $user => $rows){
+                foreach($rejections as $user => $rows){
                     $logIds = array();
-                    $sql = "SELECT user_email from  redcap_user_information where username = '" . db_real_escape_string($this->username) . "'";
+                    $sql = "SELECT user_email from redcap_user_information where username = '" . db_real_escape_string($user) . "'";
                     $q = $this->query($sql);
+                    $this->emDebug($sql, $q);
                     $email = db_result($q,0);
                     //fetch the first col in the returned row
 
@@ -244,7 +246,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     }
                     $table .= "</tbody></table>";
                     $messageBody = $header . "<hr>" . $table;
+                    $this->emDebug($email, $rejectionEmailFrom, $messageBody);
                     $emailResult = REDCap::email($email,$rejectionEmailFrom,'API whitelist rejection notice', $messageBody);
+
+                    $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
 
@@ -259,6 +264,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             }
         }
     }
+
+
     /**
      * Create a NOTIFICATION entry in the log table : indicates when last email was sent
      * @param $user , username
@@ -270,6 +277,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             'user' => $user
         ));
     }
+
 
     /**
      * Create a REJECT entry in the log table
