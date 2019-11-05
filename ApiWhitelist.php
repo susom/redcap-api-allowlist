@@ -40,7 +40,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
-    const DEFAULT_REJECTION_MESSAGE      = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
+    const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
+    const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
 
 
@@ -96,21 +97,24 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             $this->emDebug("Setting up First Time Setup");
 
             global $homepage_contact_email;
-            $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
 
             $newProjectID = $this->createAPIWhiteListRulesProject();
             if ($newProjectID > 0) {
                 $url = $this->getRulesPublicSurveyUrl($newProjectID);
                 $this->emDebug("Got survey hash of $url");
+
+                $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
                 $rejectionMessage = str_replace('INSERT_SURVEY_URL_HERE', $url, $rejectionMessage);
-
                 $this->setSystemSetting('rejection-message', $rejectionMessage);
-                $this->setSystemSetting('first-time-setup', false);
-                $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, true);
-                $this->setSystemSetting('rejection-email-header', $rejectionMessage);
-                $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
-                $this->setSystemSetting('whitelist-logging-option','1');
 
+                $emailHeader = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email, self::DEFAULT_EMAIL_REJECTION_HEADER);
+                $emailHeader = str_replace('INSERT_SURVEY_URL_HERE', $url, $emailHeader);
+                $this->setSystemSetting('rejection-email-header', $emailHeader);
+                $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, true);
+                $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
+
+                $this->setSystemSetting('first-time-setup', false);
+                $this->setSystemSetting('whitelist-logging-option','1');
             }
         }
     }
