@@ -79,7 +79,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Update the display of the sidebar link depending on configuration
      * @param $project_id
      * @param $link
-   git pu  * @return null
+     * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
@@ -139,18 +139,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 		$sql = "select hash from redcap_surveys_participants where survey_id = $survey_id and event_id = $event_id and participant_email is null";
 		$q = db_query($sql);
 
-		// Hash exists
 		if (db_num_rows($q) > 0) {
+    		// Hash exists
 			$hash = db_result($q, 0);
-		}
-		// Create hash
-		else {
+		} else {
+    		// Create hash
 			$hash = \Survey::setHash($survey_id, null, $event_id, null, true);
 		}
-
         return APP_PATH_SURVEY_FULL . "?s=$hash";
     }
-
 
 
     /**
@@ -174,6 +171,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $this->emDebug('Users not to Notify', $usersRecentlyNotified);
         return $usersRecentlyNotified;
     }
+
 
     /**
      * Fetch all rejection notifications since last email and group by user
@@ -202,6 +200,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         }
         return $payload;
     }
+
 
     /**
      * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
@@ -256,17 +255,19 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             }
         }
     }
+
+
     /**
      * Create a NOTIFICATION entry in the log table : indicates when last email was sent
      * @param $user , username
      * @return void
      */
-
     function logNotification($user){
         $this->log("NOTIFICATION", array(
             'user' => $user
         ));
     }
+
 
     /**
      * Create a REJECT entry in the log table
@@ -408,6 +409,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->exitAfterHook();     // Prevent API code from executing
                 break;
             default:
+                // In event of errors, API request is allowed
                 $this->emError("Unexpected result from screenRequest: ", $this->result);
         }
         return;
@@ -415,7 +417,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
-     * Function that dynamically creates and assigns a API whitelist Redcap project
+     * Function that dynamically creates and assigns a API whitelist Redcap project using a supertoken
      * @return boolean success
      * @throws Exception
      */
@@ -432,26 +434,24 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
         // Import Project
         $newToken = $newProjectHelper->createProjectFromXMLfile($superToken, $odmFile);
-        $this->emDebug('heres the new token', $newToken);
+        $this->emDebug('Obtained Super Token', $newToken);
         list($username, $newProjectID) = $this->getUserProjectFromToken($newToken);
-        $this->emDebug('fin', $username, $newProjectID);
+        $this->emDebug('Project Created', $username, $newProjectID);
 
         // Set the config project id
         $this->setSystemSetting(self::KEY_CONFIG_PID, $newProjectID);
 
         // Fix dynamic SQL fields
-        $newProjectHelper->convertDyanicSQLField($newProjectID,'project_id','select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;');
-
-        // Enable Survey
-        // $sql = "update redcap_projects set surveys_enabled = 1 where project_id = $newProjectID";
-        // $result = $this->query($sql);
-        // $this->emDebug($sql, $result);
-
-        // Create Survey
-        // $sql = "insert into redcap_surveys (project_id, form_name, title) values ($newProjectID, '" . self::RULES_SURVEY_FORM_NAME . "', 'API Whitelist Request')";
-        // $this->emDebug($sql);
-        // $result = $this->query($sql);
-        // $this->emDebug($result, $newProjectID);
+        $newProjectHelper->convertDyanicSQLField(
+            $newProjectID,
+            'project_id',
+            'select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;'
+        );
+        $newProjectHelper->convertDyanicSQLField(
+            $newProjectID,
+            'username',
+            'select username, CONCAT_WS(" ", CONCAT("[",username,"]"),user_firstname, user_lastname) from redcap_user_information order by username;'
+        );
 
         return $newProjectID;
     }
@@ -514,12 +514,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     continue;
                 }
 
-                $valid_ip = $check_ip ? $this->validIP($rule['ip_address']) : true;
-                $valid_user = $check_user ? $this->validUser($rule['username']) : true;
-                $valid_pid = $check_pid ? $this->validPid($rule['project_id']) : true;
+                // If empty, we assume pass but require that at least one check must be defined
+                $valid_ip   = $check_ip   ? $this->validIP($rule['ip_address'])  : true;
+                $valid_user = $check_user ? $this->validUser($rule['username'])  : true;
+                $valid_pid  = $check_pid  ? $this->validPid($rule['project_id']) : true;
 
                 $this->emDebug($valid_ip, $valid_user, $valid_pid);
-
 
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
@@ -537,6 +537,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             return "ERROR";
         }
     }
+
 
     /**
      * Check if current user IP is valid under any of the specified rules
@@ -593,7 +594,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     }
 
 
-
     /**
      * Log the request according to system settings
      */
@@ -610,7 +610,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logToDatabase();
                 break;
             case 2:
-                // Log to REDCap Log Table
+                // Log to REDCap Log Table (not implemented)
                 $cm = json_encode(array(
                     "result"        => $this->result,
                     "content"       => $content,
@@ -625,8 +625,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 Logging::logEvent("", self::LOG_TABLE, "OTHER", null, $cm, "API Whitelist Request $this->result", "", $this->username, $this->project_id);
                 break;
         }
+
         // Log to EmLogger
-        $this->emLog(array(
+        $this->emDebug(array(
             "result"     => $this->result,
             "content"    => $content,
             "ip"         => $this->ip,
@@ -690,6 +691,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return !($q === FALSE);
     }
 
+
     /**
      * Create the custom log table
      * @return bool
@@ -730,131 +732,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     function loadRules($pid) {
         $q = REDCap::getData($pid, 'json'); //, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
         $this->rules = json_decode($q,true);
-    }
-
-
-    /**
-     * Backend endpoint for dataTable ajax, 3 in total
-     * @params :
-     *  $timepartition = ("ALL" || "YEAR" || "MONTH" || "WEEK" || "DAY" || "HOUR")
-     *  $task = ("ruleTable" || "notificationTable" || "baseTable")
-     * @return payload 2D array in the datatable format:
-     * payload = [
-     *  data = [[],[], ...]
-     * ]
-     **/
-    function fetchDataTableInfo($task, $timePartition){
-        if($task === 'ruleTable'){ //on reports page
-            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_log_api_whitelist"); //query data depending on time selection
-            $payload = array();
-            $payload['data'] = array();
-            $ruleTable = array(); //lookup table to determine index to update upon non-unique encounter
-
-            foreach($result as $i=> $row){
-                $ar = [];
-                if(!in_array($row['rule_id'],$ruleTable)){ //If rule has not been encountered
-                    $rule_id = isset($row['rule_id']) ? $row['rule_id'] : "None"; //Replace empty rules with "none" in DT
-                    array_push($ar, $rule_id, $row['project_id'], $row['duration']);
-                    array_push($ruleTable, $row['rule_id']); //key is the index of payload
-                    array_push($payload['data'], $ar);
-
-                }else{
-                    $index = array_search($row['rule_id'],$ruleTable);
-                    $payload['data'][$index][2] += $row['duration']; //third index is always duration.
-                }
-            }
-            return $payload;
-        }else if($task === 'notificationTable'){ //on reports page
-            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_external_modules_log");
-            $payload = array();
-            $payload['data'] = array();
-
-            foreach($result as $i => $row){
-                $ar = [];
-                array_push($ar, $row['timestamp'], $row['project_id'], $row['value']);
-                array_push($payload['data'], $ar);
-            }
-            return $payload;
-
-        }else{ //main table based on Rule ID
-            $result = $this->generateSQLfromTimePartition($timePartition, "redcap_log_api_whitelist");
-            $this->emDebug($result);
-
-            $payload = array();
-            $payload['data'] = array();
-
-            //Tables for efficiency, 1 iteration only
-            $indexTable = []; //keeps track of rule IDs
-            $ipTable = []; //keeps track of IPs
-            foreach($result as $index => $row){
-                $ar = [];
-                $key = array_search($row['rule_id'], $indexTable); //check if rule ID has been seen before
-                if($key === false){ //if project id hasn't been pushed to payload
-                    $ipTable = [];
-                    array_push($indexTable, $row['rule_id']); //add to indexTable, KEY = Payload index
-                    array_push($ipTable, $row['ip_address']);
-                    array_push($ar, $row['rule_id'], $row['ip_address'], $row['duration']);
-
-                    if($row['result'] === 'PASS'){ //Count value for each type
-                        array_push($ar, 1,0,0);
-                    }elseif($row['result'] === 'REJECT'){
-                        array_push($ar, 0,1,0);
-                    }else{
-                        array_push($ar, 0,0,1);
-                    }
-
-                    array_push($payload['data'], $ar);
-
-                }else{ //rule ID exists, increment payload information
-                    $payload['data'][$key][2] += $row['duration']; //column 2 will always be duration
-
-                    if($row['result'] === 'PASS'){
-                        $payload['data'][$key][3]++;
-                    } elseif($row['result'] === 'REJECT'){
-                        $payload['data'][$key][4]++;
-                    }else{
-                        $payload['data'][$key][5]++;
-                    }
-                }
-
-                $ip = in_array($row['ip_address'], $ipTable); //check if IP address has been encountered
-                if(!$ip){
-                    if($row['ip_address'] === "")
-                        $concat = ", " . "none";
-                    else
-                        $concat = ", " . $row['ip_address'];
-                    $payload['data'][$key][1] .= $concat;
-                    array_push($ipTable, $row['ip_address']);
-                }
-            }
-            return $payload;
-        }
-    }
-
-    /**
-     * Function that grabs data given time and table
-     * @params:
-     *  $timepartition = ("ALL" || "YEAR" || "MONTH" || "WEEK" || "DAY" || "HOUR")
-     *  $location = redcap data table
-     * @return string
-     *
-     */
-    function generateSQLfromTimePartition($timePartition, $location){
-        if($location == 'redcap_external_modules_log'){ //Only join table, must compensate with parameters table
-            if($timePartition === "ALL"){
-                $sql = "SELECT * FROM {$location} JOIN redcap_external_modules_log_parameters remlp on redcap_external_modules_log.log_id = remlp.log_id";
-            } else {
-                $sql = "SELECT * FROM {$location} JOIN redcap_external_modules_log_parameters remlp on redcap_external_modules_log.log_id = remlp.log_id 
-                        where timestamp>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
-            }
-        }else{
-            if($timePartition === "ALL"){
-                $sql = "Select * from {$location}";
-            } else {
-                $sql = "Select * from {$location} where ts>=DATE_SUB(NOW(),INTERVAL 1 {$timePartition} )";
-            }
-        }
-        return $this->query($sql);
     }
 
 
