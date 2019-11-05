@@ -33,7 +33,15 @@
 
   "no-auth-pages": [
   ],
-
+  "crons": [
+    {
+      "cron_name": "rejection_notifiation_emails",
+      "cron_description": "Cron that runs every 10 minutes to email users' API rejections if valid",
+      "method": "cronRejectionNotifications",
+      "cron_frequency": "600",
+      "cron_max_run_time": "60"
+    }
+  ],
   "links": {
     "control-center": [
       {
