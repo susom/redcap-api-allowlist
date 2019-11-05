@@ -737,7 +737,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @param $pid
      */
     function loadRules($pid) {
-        $q = REDCap::getData($pid, 'json'); //, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
+        $filter = "[enabled(1)] = '1'";
+        $q = REDCap::getData($pid, 'json', NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
         $this->rules = json_decode($q,true);
     }
 
