@@ -156,7 +156,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     }
 
 
-
     /**
      * Fetch all users from within the external modules log that have been sent a email notification within
      *  the MIN_EMAIL_RESEND_DURATION threshold
@@ -178,6 +177,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $this->emDebug('Users not to Notify', $usersRecentlyNotified);
         return $usersRecentlyNotified;
     }
+
 
     /**
      * Fetch all rejection notifications since last email and group by user
@@ -206,6 +206,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         }
         return $payload;
     }
+
 
     /**
      * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
