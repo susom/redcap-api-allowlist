@@ -781,29 +781,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return $sql;
     }
 
-create table redcap_log_api_whitelist
-(
-	log_id int(10) auto_increment
-		primary key,
-	ip_address varchar(50) null,
-	username varchar(255) null,
-	project_id int(10) null,
-	ts timestamp default current_timestamp() null,
-	duration float null,
-	result enum('PASS', 'REJECT', 'ERROR') charset utf8 null,
-	rule_id int(10) null,
-	comment text charset utf8 null
-)
-collate=utf8_unicode_ci;
-
-create index redcap_log_api_whitelist_project_id_index
-	on redcap_log_api_whitelist (project_id);
-
-create index redcap_log_api_whitelist_username_index
-	on redcap_log_api_whitelist (username);
-
-
-
 
     /**
      * Load all of the configuration rules
