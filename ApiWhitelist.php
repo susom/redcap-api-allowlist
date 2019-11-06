@@ -42,7 +42,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
     const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
     const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
-    const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
+    const MIN_EMAIL_RESEND_DURATION      = 15; //minutes interval to prevent default notifications from repeating rejections
+    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and is being marked inactive.  If you no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive messages notifying you of rejected requests with instructions with instructions.';
+
 
 
     /**
@@ -213,6 +215,18 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
+     * Get an email address for a username
+     * @param $user
+     * @return bool
+     */
+    function getUserEmail($user) {
+        $sql = "SELECT user_email from redcap_user_information where username = '" . db_real_escape_string($user) . "'";
+        $q = $this->query($sql);
+        return db_result($q,0);
+    }
+
+
+    /**
      * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
      * @throws Exception
      * @return void
@@ -230,12 +244,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             if(!empty($rejectionEmailFrom)) {
                 foreach($rejections as $user => $rows){
                     $logIds = array();
-                    $sql = "SELECT user_email from redcap_user_information where username = '" . db_real_escape_string($user) . "'";
-                    $q = $this->query($sql);
-                    $this->emDebug($sql, $q);
-                    $email = db_result($q,0);
-                    //fetch the first col in the returned row
+                    $email = $this->getUserEmail($user);
 
+                    //fetch the first col in the returned row
                     $table = "<table>
                                 <thead><tr>
                                     <th>Time</th>
@@ -520,6 +531,39 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $check_ip = $rule['whitelist_type___1'];
                 $check_user = $rule['whitelist_type___2'];
                 $check_pid = $rule['whitelist_type___3'];
+
+                // Verify rule has not expired
+                $expires = $rule['expiration_date'];
+                if (!empty($expires) && strtotime($expires) < time()) {
+                    // The rule has expired!
+                    // Is there an email for who registered the rule?
+                    $emails = [];
+                    if (!empty($rule['email'])) $emails[] = $rule['email'];
+
+                    // Is there a different email address associated with the token?
+                    $tokenEmail = $this->getUserEmail($this->username);
+                    if (!empty($tokenEmail) && !in_array($tokenEmail,$emails)) $emails[] = $tokenEmail;
+
+                    // Let's email the user(s)
+                    $to = explode(", ", $emails);
+                    $from = $this->getSystemSetting('rejection-email-from-address');
+                    $subject = "REDCap API Whitelist Rule #" . $this->rule_id . " Expiration Warning";
+                    $message = "<p>Dear REDCap API User</p><p>" . self::EXPIRED_RULE_EMAIL . "</p>";
+                    $message .= "<div><b>" . $subject . "</b></div>";
+                    if (!empty($rule['request_notes'])) $message .= "<div><i>" . $rule['request_notes'] . "</i></div>";
+                    if ($check_ip) $message   .= "<div> - Network Range: " . $rule['ip_address'] . "</div>";
+                    if ($check_user) $message .= "<div> - Username: " . $rule['username'] . "</div>";
+                    if ($check_pid) $message  .= "<div> - Project Id: " . $rule['project_id'] . "</div>";
+                    REDCap::email($to, $from, $subject, $message);
+
+                    // Inactivate the rule
+                    $rule['enabled___1'] = 0;
+                    $result = REDCap::saveData($this->config_pid, 'json', json_encode(array($rule)));
+                    $this->emDebug("Inactivated expired rule " . $this->rule_id, $result);
+
+                    continue;
+                }
+
 
                 if (!($check_ip || $check_user || $check_pid)) {
                     // NONE ARE CHECKED - SKIP THIS CONFIG
