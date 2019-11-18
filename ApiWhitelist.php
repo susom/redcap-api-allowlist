@@ -545,7 +545,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     if (!empty($tokenEmail) && !in_array($tokenEmail,$emails)) $emails[] = $tokenEmail;
 
                     // Let's email the user(s)
-                    $to = explode(", ", $emails);
+                    $to = implode(", ", $emails);
                     $from = $this->getSystemSetting('rejection-email-from-address');
                     $subject = "REDCap API Whitelist Rule #" . $this->rule_id . " Expiration Warning";
                     $message = "<p>Dear REDCap API User</p><p>" . self::EXPIRED_RULE_EMAIL . "</p>";
