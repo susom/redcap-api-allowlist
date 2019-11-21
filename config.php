@@ -142,10 +142,8 @@ callJSfile("clipboard.js");
 <?php
     }
 
-ExternalModules::tt_initializeJSLanguageStore();
-//= An error occurred while disabling the {0} module:
-ExternalModules::tt_transferToJSLanguageStore("em_errors_5");
-ExternalModules::addResource(ExternalModules::getManagerJSDirectory().'control_center.js');
-require_once APP_PATH_DOCROOT . 'ControlCenter/footer.php';
+    // Show Control Center
+    ExternalModules::addResource(ExternalModules::getManagerJSDirectory().'control_center.js');
+    require_once APP_PATH_DOCROOT . 'ControlCenter/footer.php';
 
 ?>
