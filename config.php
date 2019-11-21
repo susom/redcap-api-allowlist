@@ -2,6 +2,8 @@
 namespace Stanford\ApiWhitelist;
 /** @var \Stanford\ApiWhitelist\ApiWhitelist $module */
 
+use \ExternalModules\ExternalModules;
+
 require APP_PATH_DOCROOT . "ControlCenter/header.php";
 
 if (!SUPER_USER) {
@@ -104,7 +106,7 @@ callJSfile("clipboard.js");
 			<div class="clear"></div>
     </div>
 <?php
-    if (! $module->getSystemSetting(self::KEY_WHITELIST_ACTIVE)) {
+    if (! $module->getSystemSetting($module::KEY_WHITELIST_ACTIVE)) {
         echo "<div class='alert alert-danger text-center'>The API Whitelist is not activated.  Check the module config to activate filtering</div>";
     }
 ?>
@@ -139,4 +141,11 @@ callJSfile("clipboard.js");
 </div>
 <?php
     }
+
+ExternalModules::tt_initializeJSLanguageStore();
+//= An error occurred while disabling the {0} module:
+ExternalModules::tt_transferToJSLanguageStore("em_errors_5");
+ExternalModules::addResource(ExternalModules::getManagerJSDirectory().'control_center.js');
+require_once APP_PATH_DOCROOT . 'ControlCenter/footer.php';
+
 ?>
