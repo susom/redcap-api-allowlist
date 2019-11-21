@@ -150,6 +150,12 @@
       }
     },
     {
+      "key": "activate-whitelist",
+      "name": "<b>Activate Whitelist</b><br>Once your server is configured and your rules are in-place, you can check this box to activate filtering based on your whitelist",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
       "key": "enable-system-debug-logging",
       "name": "<b>Enable Debug Logging</b><br>If you have the Stanford emLogger external module installed and configured, you can enable additional debug-level logging through this checkbox</b>",
       "required": false,

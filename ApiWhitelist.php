@@ -37,6 +37,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_LOGGING_OPTION             = 'whitelist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
+    const KEY_WHITELIST_ACTIVE           = 'activate-whitelist';
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
@@ -82,6 +83,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
             // Do nothing - show default info link
+            if($this->getSystemSetting(self::KEY_WHITELIST_ACTIVE) == 0) {
+                $link['icon'] = "cross_small_gray";
+                $link['name'] = "API Whitelist - Inactive";
+            }
         } else {
             $link['icon'] = "exclamation";
             $link['name'] = "API Whitelist - Setup Incomplete";
@@ -408,6 +413,13 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         // Exit if this isn't an API request
         if (!self::isApiRequest()) return;
 
+        // Make sure module is active
+        if (! $this->getSystemSetting(self::KEY_WHITELIST_ACTIVE)) {
+            $this->comment = "Whitelist is not enabled";
+            $this->emDebug($this->comment);
+            return;
+        }
+
         $this->emDebug($this->getModuleName() . " is parsing API Request");
 
         $this->result = $this->screenRequest();
@@ -424,7 +436,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logRequest();
                 break;
             case "REJECT":
-//                $this->checkRejectionEmailNotification();
                 $this->logRequest();
                 $this->logRejection();
                 $this->checkNotifications();

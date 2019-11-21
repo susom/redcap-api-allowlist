@@ -103,6 +103,11 @@ callJSfile("clipboard.js");
 			</div>
 			<div class="clear"></div>
     </div>
+<?php
+    if (! $module->getSystemSetting(self::KEY_WHITELIST_ACTIVE)) {
+        echo "<div class='alert alert-danger text-center'>The API Whitelist is not activated.  Check the module config to activate filtering</div>";
+    }
+?>
     <hr>
 <?php
     $logOption = $module->getSystemSetting('whitelist-logging-option');
