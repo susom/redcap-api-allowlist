@@ -107,7 +107,7 @@ callJSfile("clipboard.js");
     </div>
 <?php
     if (! $module->getSystemSetting($module::KEY_WHITELIST_ACTIVE)) {
-        echo "<div class='alert alert-danger text-center'>The API Whitelist is not activated.  Check the module config to activate filtering</div>";
+        echo "<hr><div class='alert alert-danger text-center'>The API Whitelist is not activated.  Check the module config to activate filtering</div>";
     }
 ?>
     <hr>
