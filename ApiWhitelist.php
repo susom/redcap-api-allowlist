@@ -18,7 +18,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     public $project_id;        // request project_id
 
     public $required_whitelist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
-    public $config_valid;      // configuation valid
+    public $config_valid;      // configuration valid
     public $config_errors;     // array of configuration errors
     public $logging_option;    // configured log option
 
@@ -32,29 +32,41 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     public $log_id;            // log_id if last inserted db log
 
     const LOG_TABLE                      = 'redcap_log_api_whitelist';
+    const RULES_SURVEY_FORM_NAME         = 'api_whitelist_request';
     const REQUIRED_WHITELIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'enabled');
     const KEY_LOGGING_OPTION             = 'whitelist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
+    const KEY_WHITELIST_ACTIVE           = 'activate-whitelist';
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
-    const KEY_CONFIG_PID                 = 'config-pid';
+    const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
-    const KEY_REJECTION_EMAIL_LOGS       = 'rejection-email-logs';
-    const DEFAULT_REJECTION_MESSAGE      = 'This redcap API is restricted using the API whitelist external module. To request an exception for your project, please email HOMEPAGE_CONTACT_EMAIL';
-    const MIN_EMAIL_RESEND_DURATION      = 15; //minutes
-
-    public function __construct() {
-        parent::__construct();
-        $this->disableUserBasedSettingPermissions();
-    }
+    const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
+    const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
+    const MIN_EMAIL_RESEND_DURATION      = 15; //minutes interval to prevent default notifications from repeating rejections
+    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and is being marked inactive.  If you no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive messages notifying you of rejected requests with instructions with instructions.';
 
 
+
+    /**
+     * When the module is first enabled on the system level, check for a valid configuration
+     * @param $version
+     */
     function redcap_module_system_enable($version) {
-        $this->validateSetup();
-        $this->emDebug("Module Enabled.  Valid?", $this->config_valid);
+        try {
+            $this->validateSetup();
+            $this->emDebug("Module Enabled.  Valid?", $this->config_valid);
+        } catch (Exception $e) {
+            $this->emError($e->getMessage(), $e->getLine());
+        }
     }
 
 
+    /**
+     * On config chagne, check for setup and update validation setting
+     * @param $project_id
+     * @throws Exception
+     */
     function redcap_module_save_configuration($project_id) {
         $this->checkFirstTimeSetup();
         $this->validateSetup();
@@ -66,30 +78,94 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Update the display of the sidebar link depending on configuration
      * @param $project_id
      * @param $link
-     * @return null
+   git pu  * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
-            // Do nothing - no need to show the link
+            // Do nothing - show default info link
+            if($this->getSystemSetting(self::KEY_WHITELIST_ACTIVE) == 0) {
+                $link['icon'] = "cross_small_gray";
+                $link['name'] = "API Whitelist - Inactive";
+            }
         } else {
             $link['icon'] = "exclamation";
+            $link['name'] = "API Whitelist - Setup Incomplete";
         }
         return $link;
     }
 
-    function checkFirstTimeSetup(){
-        global $homepage_contact_email;
 
+    /**
+     * Try to automatically configure the EM by creating a new project
+     * @throws Exception
+     */
+    function checkFirstTimeSetup(){
         if($this->getSystemSetting('first-time-setup')){
-            $this->createAPIWhiteListRulesProject();
+            $this->emDebug("Setting up First Time Setup");
+
+            global $homepage_contact_email;
+
+            $newProjectID = $this->createAPIWhiteListRulesProject();
+            if ($newProjectID > 0) {
+                $url = $this->getRulesPublicSurveyUrl($newProjectID);
+                $this->emDebug("Got survey hash of $url");
+
+                $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
+                $rejectionMessage = str_replace('INSERT_SURVEY_URL_HERE', $url, $rejectionMessage);
+                $this->setSystemSetting('rejection-message', $rejectionMessage);
+
+                $emailHeader = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email, self::DEFAULT_EMAIL_REJECTION_HEADER);
+                $emailHeader = str_replace('INSERT_SURVEY_URL_HERE', $url, $emailHeader);
+                $this->setSystemSetting('rejection-email-header', $emailHeader);
+                $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, true);
+                $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
+
+                $this->setSystemSetting('first-time-setup', false);
+                $this->setSystemSetting('whitelist-logging-option','1');
+            }
         }
-        $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
-        $this->emDebug($homepage_contact_email, $rejectionMessage);
-        $this->setSystemSetting('rejection-message', $rejectionMessage);
-        $this->setSystemSetting('first-time-setup',0);
-        $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, 1);
-        $this->setSystemSetting('whitelist-logging-option','1');
     }
+
+    /**
+     * Called Every 15 minutes via cron, determines whether or not to email user with Rejection notices
+     * Runs assuming MIN_EMAIL_RESEND_DURATION, is 15m
+     *
+     */
+    function cronRejectionNotifications(){
+        $this->checkNotifications();
+    }
+
+
+    /**
+     * Get the public survey url for the current PID
+     * @param $pid
+     * @return string
+     * @throws Exception
+     */
+    function getRulesPublicSurveyUrl($pid) {
+
+        // Get the survey and event ids in the project
+        $proj = new \Project($pid);
+        $event_id = $proj->firstEventId;
+        $survey_id = $proj->firstFormSurveyId;
+        $this->emDebug($survey_id, $event_id);
+
+        // See if there is a hash yet
+		$sql = "select hash from redcap_surveys_participants where survey_id = $survey_id and event_id = $event_id and participant_email is null";
+		$q = db_query($sql);
+
+		// Hash exists
+		if (db_num_rows($q) > 0) {
+    		// Hash exists
+			$hash = db_result($q, 0);
+		} else {
+    		// Create hash
+			$hash = \Survey::setHash($survey_id, null, $event_id, null, true);
+		}
+
+        return APP_PATH_SURVEY_FULL . "?s=$hash";
+    }
+
 
     /**
      * Fetch all users from within the external modules log that have been sent a email notification within
@@ -113,12 +189,13 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return $usersRecentlyNotified;
     }
 
+
     /**
      * Fetch all rejection notifications since last email and group by user
      * @param null $userFilter
      * @return 2d array, each rejection row indexed by user
      */
-    function getRejectionNotifications($userFilter = null) {
+    function getRejections($userFilter = null) {
         $sql = "select log_id, timestamp, ip, project_id, user where message = 'REJECT'";
         $q = $this->queryLogs($sql);
         $payload = array();
@@ -141,6 +218,19 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         return $payload;
     }
 
+
+    /**
+     * Get an email address for a username
+     * @param $user
+     * @return bool
+     */
+    function getUserEmail($user) {
+        $sql = "SELECT user_email from redcap_user_information where username = '" . db_real_escape_string($user) . "'";
+        $q = $this->query($sql);
+        return db_result($q,0);
+    }
+
+
     /**
      * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
      * @throws Exception
@@ -150,20 +240,18 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $filter = $this->getRecentlyNotifiedUsers();
         //fetch users that have already been notified within the threshold period
 
-        $notifications = ($this->getRejectionNotifications($filter));
+        $rejections = ($this->getRejections($filter));
         //fetch all rejection messages, grouped by user
-
-        if(!empty($notifications)) {
+        $this->emDebug($rejections);
+        if(!empty($rejections)) {
             $header = $this->getSystemSetting('rejection-email-header');
             $rejectionEmailFrom = $this->getSystemSetting('rejection-email-from-address');
             if(!empty($rejectionEmailFrom)) {
-                foreach($notifications as $user => $rows){
+                foreach($rejections as $user => $rows){
                     $logIds = array();
-                    $sql = "SELECT user_email from  redcap_user_information where username = '" . db_real_escape_string($this->username) . "'";
-                    $q = $this->query($sql);
-                    $email = db_result($q,0);
-                    //fetch the first col in the returned row
+                    $email = $this->getUserEmail($user);
 
+                    //fetch the first col in the returned row
                     $table = "<table>
                                 <thead><tr>
                                     <th>Time</th>
@@ -179,7 +267,10 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     }
                     $table .= "</tbody></table>";
                     $messageBody = $header . "<hr>" . $table;
+                    $this->emDebug($email, $rejectionEmailFrom, $messageBody);
                     $emailResult = REDCap::email($email,$rejectionEmailFrom,'API whitelist rejection notice', $messageBody);
+
+                    $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
 
@@ -194,17 +285,19 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             }
         }
     }
+
+
     /**
      * Create a NOTIFICATION entry in the log table : indicates when last email was sent
      * @param $user , username
      * @return void
      */
-
     function logNotification($user){
         $this->log("NOTIFICATION", array(
             'user' => $user
         ));
     }
+
 
     /**
      * Create a REJECT entry in the log table
@@ -320,6 +413,13 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         // Exit if this isn't an API request
         if (!self::isApiRequest()) return;
 
+        // Make sure module is active
+        if (! $this->getSystemSetting(self::KEY_WHITELIST_ACTIVE)) {
+            $this->comment = "Whitelist is not enabled";
+            $this->emDebug($this->comment);
+            return;
+        }
+
         $this->emDebug($this->getModuleName() . " is parsing API Request");
 
         $this->result = $this->screenRequest();
@@ -336,7 +436,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logRequest();
                 break;
             case "REJECT":
-//                $this->checkRejectionEmailNotification();
                 $this->logRequest();
                 $this->logRejection();
                 $this->checkNotifications();
@@ -353,7 +452,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
-     * Function that dynamically creates and assigns a API whitelist Redcap project
+     * Function that dynamically creates and assigns a API whitelist Redcap project using a supertoken
      * @return boolean success
      * @throws Exception
      */
@@ -370,17 +469,26 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
         // Import Project
         $newToken = $newProjectHelper->createProjectFromXMLfile($superToken, $odmFile);
-        $this->emDebug('heres the new token', $newToken);
+        $this->emDebug('Obtained Super Token', $newToken);
         list($username, $newProjectID) = $this->getUserProjectFromToken($newToken);
-        $this->emDebug('fin', $username, $newProjectID);
+        $this->emDebug('Project Created', $username, $newProjectID);
 
         // Set the config project id
-        $this->setSystemSetting('config-pid', $newProjectID);
+        $this->setSystemSetting(self::KEY_CONFIG_PID, $newProjectID);
 
         // Fix dynamic SQL fields
-        $newProjectHelper->convertDyanicSQLField($newProjectID,'username','select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;');
-        $newProjectHelper->convertDyanicSQLField($newProjectID,'project_id','select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;');
-        return true;
+        $newProjectHelper->convertDyanicSQLField(
+            $newProjectID,
+            'project_id',
+            'select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;'
+        );
+        $newProjectHelper->convertDyanicSQLField(
+            $newProjectID,
+            'username',
+            'select username, CONCAT_WS(" ", CONCAT("[",username,"]"),user_firstname, user_lastname) from redcap_user_information order by username;'
+        );
+
+        return $newProjectID;
     }
 
 
@@ -435,18 +543,51 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $check_user = $rule['whitelist_type___2'];
                 $check_pid = $rule['whitelist_type___3'];
 
+                // Verify rule has not expired
+                $expires = $rule['expiration_date'];
+                if (!empty($expires) && strtotime($expires) < time()) {
+                    // The rule has expired!
+                    // Is there an email for who registered the rule?
+                    $emails = [];
+                    if (!empty($rule['email'])) $emails[] = $rule['email'];
+
+                    // Is there a different email address associated with the token?
+                    $tokenEmail = $this->getUserEmail($this->username);
+                    if (!empty($tokenEmail) && !in_array($tokenEmail,$emails)) $emails[] = $tokenEmail;
+
+                    // Let's email the user(s)
+                    $to = implode(", ", $emails);
+                    $from = $this->getSystemSetting('rejection-email-from-address');
+                    $subject = "REDCap API Whitelist Rule #" . $this->rule_id . " Expiration Warning";
+                    $message = "<p>Dear REDCap API User</p><p>" . self::EXPIRED_RULE_EMAIL . "</p>";
+                    $message .= "<div><b>" . $subject . "</b></div>";
+                    if (!empty($rule['request_notes'])) $message .= "<div><i>" . $rule['request_notes'] . "</i></div>";
+                    if ($check_ip) $message   .= "<div> - Network Range: " . $rule['ip_address'] . "</div>";
+                    if ($check_user) $message .= "<div> - Username: " . $rule['username'] . "</div>";
+                    if ($check_pid) $message  .= "<div> - Project Id: " . $rule['project_id'] . "</div>";
+                    REDCap::email($to, $from, $subject, $message);
+
+                    // Inactivate the rule
+                    $rule['enabled___1'] = 0;
+                    $result = REDCap::saveData($this->config_pid, 'json', json_encode(array($rule)));
+                    $this->emDebug("Inactivated expired rule " . $this->rule_id, $result);
+
+                    continue;
+                }
+
+
                 if (!($check_ip || $check_user || $check_pid)) {
                     // NONE ARE CHECKED - SKIP THIS CONFIG
                     $this->emError("Rule " . $rule['rule_id'] . " does not have any filters checked!");
                     continue;
                 }
 
-                $valid_ip = $check_ip ? $this->validIP($rule['ip_address']) : true;
-                $valid_user = $check_user ? $this->validUser($rule['username']) : true;
-                $valid_pid = $check_pid ? $this->validPid($rule['project_id']) : true;
+                // If empty, we assume pass but require that at least one check must be defined
+                $valid_ip   = $check_ip   ? $this->validIP($rule['ip_address'])  : true;
+                $valid_user = $check_user ? $this->validUser($rule['username'])  : true;
+                $valid_pid  = $check_pid  ? $this->validPid($rule['project_id']) : true;
 
                 $this->emDebug($valid_ip, $valid_user, $valid_pid);
-
 
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
@@ -464,6 +605,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             return "ERROR";
         }
     }
+
 
     /**
      * Check if current user IP is valid under any of the specified rules
@@ -520,19 +662,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     }
 
 
-//    function checkRejectionEmailNotification() {
-//        // Don't do anything if this isn't enabled
-//        if (!$this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY)){
-//            return;
-//        }
-//
-//        // If the username is empty - then we can't do anything either
-//        if (empty($this->username)){
-//            return;
-//        }
-//    }
-
-
     /**
      * Log the request according to system settings
      */
@@ -549,7 +678,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logToDatabase();
                 break;
             case 2:
-                // Log to REDCap Log Table
+                // Log to REDCap Log Table (not implemented)
                 $cm = json_encode(array(
                     "result"        => $this->result,
                     "content"       => $content,
@@ -565,7 +694,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 break;
         }
         // Log to EmLogger
-        $this->emLog(array(
+        $this->emDebug(array(
             "result"     => $this->result,
             "content"    => $content,
             "ip"         => $this->ip,
@@ -586,14 +715,14 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             username = '%s',
             project_id = %d,
             result = '%s',
-            rule_id = %d,
+            rule_id = %s,
             comment = '%s'",
             db_real_escape_string(self::LOG_TABLE),
             db_real_escape_string($this->ip),
             db_real_escape_string($this->username),
             db_real_escape_string($this->project_id),
             db_real_escape_string($this->result),
-            db_real_escape_string($this->rule_id),
+            db_real_escape_string(empty($this->rule_id) ? "NULL" : $this->rule_id),
             db_real_escape_string($comment)
         );
         db_query($sql);
@@ -655,7 +784,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
               `result` enum('PASS','REJECT','ERROR') CHARACTER SET utf8 DEFAULT NULL,
               `rule_id` int(10) DEFAULT NULL,
               `comment` text CHARACTER SET utf8,
-              PRIMARY KEY (`log_id`)
+              PRIMARY KEY (`log_id`),
+              INDEX (`username`),
+              INDEX (`project_id`)
             ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
         ";
         return $sql;
@@ -667,7 +798,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @param $pid
      */
     function loadRules($pid) {
-        $q = REDCap::getData($pid, 'json'); //, NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
+        $filter = "[enabled(1)] = '1'";
+        $q = REDCap::getData($pid, 'json', NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
         $this->rules = json_decode($q,true);
     }
 
@@ -748,4 +880,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
         return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
+
+
 }
