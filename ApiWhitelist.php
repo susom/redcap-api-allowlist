@@ -713,7 +713,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             WHERE api_token = '" . db_escape($token) . "'";
         $q = db_query($sql);
         if (db_num_rows($q) != 1) {
-            throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token" );
+            throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token : " . db_num_rows($q) );
         } else {
             $row = db_fetch_assoc($q);
             return array($row['username'], $row['project_id']);
