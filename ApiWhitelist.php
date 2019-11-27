@@ -613,9 +613,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @return bool T/F
      */
     function validIP($cidrs) {
-        $this->emError('CIDRS', $cidrs);
+        // $this->emDebug('CIDRS', $cidrs);
         $ips = preg_split("/[\n,]/", $cidrs);
-        $this->emError($ips);
+        // $this->emDebug($ips);
 
         //check if any of the ips are valid
         foreach($ips as $ip){
@@ -876,7 +876,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $ip_mask = ~((1 << (32 - $mask)) - 1);
         $ip_ip = ip2long ($IP);
 
-        $this->emError(($ip_ip& $ip_mask), ($ip_net & $ip_mask));
+        // $this->emDebug(($ip_ip & $ip_mask), ($ip_net & $ip_mask));
 
         return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
