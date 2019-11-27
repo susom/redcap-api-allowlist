@@ -528,7 +528,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             $this->loadRules($this->config_pid);
 
             // Debug post
-            $this->emDebug("POST", $_POST);
+            // $this->emDebug("POST", $_POST);
 
             // Get the project and user from the token
             $this->loadProjectUsername($this->token);
@@ -594,17 +594,34 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
 
-                    // THIS IS AN EMERGENCY PATCH FOR FCR APP AS REDCAP NO LONGER ALLOWS REDCAP_EVENT_NAME IN FIELD AND WE CANT UPDATE SOURCE CODE
-                    if(!empty($_POST['token']) && hash("sha256", $_POST['token']) === "3bbeb68311c5d770a2da903b1ffa54843fda3ecf0a109468895558db5b0bbb53") {
+                    // TEST FIX API REQUESTS THAT ASK FOR REDCAP_EVENT NAME EXPLICITLY WHICH NOW THROWS AN ERROR
+                    if ($this->getSystemSetting('fix-redcap-event-name-error')) {
+                        $content = @$_POST['content'];
                         $fields = @$_POST['fields'];
-                        if (!empty($fields)) {
-                            if (($key = array_search('redcap_event_name', $fields)) !== false) {
-                                $this->emDebug("Fixing post for FCR app in project: " . $rule['project_id']);
+                        if ($content === "record" && !empty($fields)) {
+                            // Find the key for the invalid field (if present)
+                            $key = array_search('redcap_event_name', $fields);
+                            if ($key !== false) {
                                 unset($fields[$key]);
+                                $this->emDebug("Fixing redcap_event_error at row $key", "BEFORE", $_POST['fields'], "AFTER", $fields );
+                                $_POST['fields'] = $fields;
                             }
-                            $_POST['fields'] = $fields;
                         }
                     }
+
+
+//                    // THIS IS AN EMERGENCY PATCH FOR FCR APP AS REDCAP NO LONGER ALLOWS REDCAP_EVENT_NAME IN FIELD AND WE CANT UPDATE SOURCE CODE
+//                    if(!empty($_POST['token']) && hash("sha256", $_POST['token']) === "3bbeb68311c5d770a2da903b1ffa54843fda3ecf0a109468895558db5b0bbb53") {
+//                        $fields = @$_POST['fields'];
+//                        if (!empty($fields)) {
+//                            if (($key = array_search('redcap_event_name', $fields)) !== false) {
+//
+//                                $this->emDebug("Fixing post for FCR app in project: " . $rule['project_id']);
+//                                unset($fields[$key]);
+//                            }
+//                            $_POST['fields'] = $fields;
+//                        }
+//                    }
 
                     return "PASS";
                 }
