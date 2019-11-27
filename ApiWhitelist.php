@@ -528,6 +528,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             // Load all of the whitelist rules
             $this->loadRules($this->config_pid);
 
+            // Debug post
+            $this->emDebug("POST", $_POST);
+
             // Get the project and user from the token
             $this->loadProjectUsername($this->token);
 
@@ -638,7 +641,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         if (empty($this->username)) {
             $this->emError("Unable to parse username from token " . $this->token);
         }
-        $this->emError($this->username, $username);
+        // $this->emDebug($this->username, $username);
 
         return $this->username == $username;
     }
