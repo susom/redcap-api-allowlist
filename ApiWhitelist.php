@@ -594,7 +594,11 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
 
-                    // TEST FIX API REQUESTS THAT ASK FOR REDCAP_EVENT NAME EXPLICITLY WHICH NOW THROWS AN ERROR
+                    // IN OLDER VERSIONS OF REDCAP, THE API WOULD ALLOW YOU TO SPECIFY THE EVENT NAME IN THE
+                    // LIST OF FIELDS TO QUERY.  WE DEPLOYED A MOBILE APP THAT HAD THIS AND AFTER AN UPGRADE
+                    // FOUND ALL API REQUESTS WERE REJECTED.  SINCE WE COULDN'T EASILY FIX THE APP, WE ADDED
+                    // THIS FIX WHICH REMOVES redcap-event-name FROM THE QUERIED LIST OF FIELDS IN AN API RECORD
+                    // QUERY.
                     if ($this->getSystemSetting('fix-redcap-event-name-error')) {
                         $content = @$_POST['content'];
                         $fields = @$_POST['fields'];
@@ -609,19 +613,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                         }
                     }
 
-
-//                    // THIS IS AN EMERGENCY PATCH FOR FCR APP AS REDCAP NO LONGER ALLOWS REDCAP_EVENT_NAME IN FIELD AND WE CANT UPDATE SOURCE CODE
-//                    if(!empty($_POST['token']) && hash("sha256", $_POST['token']) === "3bbeb68311c5d770a2da903b1ffa54843fda3ecf0a109468895558db5b0bbb53") {
-//                        $fields = @$_POST['fields'];
-//                        if (!empty($fields)) {
-//                            if (($key = array_search('redcap_event_name', $fields)) !== false) {
-//
-//                                $this->emDebug("Fixing post for FCR app in project: " . $rule['project_id']);
-//                                unset($fields[$key]);
-//                            }
-//                            $_POST['fields'] = $fields;
-//                        }
-//                    }
 
                     return "PASS";
                 }
