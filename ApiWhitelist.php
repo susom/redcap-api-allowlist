@@ -273,7 +273,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
-
                         $this->emLog('deleting log_ids', $logIds);
 
                         $sql = 'log_id in ('. implode(',', $logIds) . ')';
@@ -590,10 +589,23 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $valid_user = $check_user ? $this->validUser($rule['username'])  : true;
                 $valid_pid  = $check_pid  ? $this->validPid($rule['project_id']) : true;
 
-                $this->emDebug($valid_ip, $valid_user, $valid_pid);
+                // $this->emDebug($valid_ip, $valid_user, $valid_pid);
 
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
+
+                    // THIS IS AN EMERGENCY PATCH FOR FCR APP AS REDCAP NO LONGER ALLOWS REDCAP_EVENT_NAME IN FIELD AND WE CANT UPDATE SOURCE CODE
+                    if(!empty($_POST['token']) && hash("sha256", $_POST['token']) === "3bbeb68311c5d770a2da903b1ffa54843fda3ecf0a109468895558db5b0bbb53") {
+                        $fields = @$_POST['fields'];
+                        if (!empty($fields)) {
+                            if (($key = array_search('redcap_event_name', $fields)) !== false) {
+                                $this->emDebug("Fixing post for FCR app in project: " . $rule['project_id']);
+                                unset($fields[$key]);
+                            }
+                            $_POST['fields'] = $fields;
+                        }
+                    }
+
                     return "PASS";
                 }
 
