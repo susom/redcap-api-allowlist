@@ -150,6 +150,12 @@
       }
     },
     {
+      "key": "fix-redcap-event-name-error",
+      "name": "<b>Fix redcap_event_name issue</b><br>API queries used to allow you to ask for the redcap_event_name as a field but now this throws an exception.  If you check this box, the API whitelist will remove the redcap_event_name field request from incoming API record queries preventing the error.",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
       "key": "activate-whitelist",
       "name": "<b>Activate Whitelist</b><br>Once your server is configured and your rules are in-place, you can check this box to activate filtering based on your whitelist",
       "required": false,

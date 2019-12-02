@@ -273,7 +273,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
-
                         $this->emLog('deleting log_ids', $logIds);
 
                         $sql = 'log_id in ('. implode(',', $logIds) . ')';
@@ -528,6 +527,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             // Load all of the whitelist rules
             $this->loadRules($this->config_pid);
 
+            // Debug post
+            // $this->emDebug("POST", $_POST);
+
             // Get the project and user from the token
             $this->loadProjectUsername($this->token);
 
@@ -587,10 +589,31 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $valid_user = $check_user ? $this->validUser($rule['username'])  : true;
                 $valid_pid  = $check_pid  ? $this->validPid($rule['project_id']) : true;
 
-                $this->emDebug($valid_ip, $valid_user, $valid_pid);
+                // $this->emDebug($valid_ip, $valid_user, $valid_pid);
 
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
+
+                    // IN OLDER VERSIONS OF REDCAP, THE API WOULD ALLOW YOU TO SPECIFY THE EVENT NAME IN THE
+                    // LIST OF FIELDS TO QUERY.  WE DEPLOYED A MOBILE APP THAT HAD THIS AND AFTER AN UPGRADE
+                    // FOUND ALL API REQUESTS WERE REJECTED.  SINCE WE COULDN'T EASILY FIX THE APP, WE ADDED
+                    // THIS FIX WHICH REMOVES redcap-event-name FROM THE QUERIED LIST OF FIELDS IN AN API RECORD
+                    // QUERY.
+                    if ($this->getSystemSetting('fix-redcap-event-name-error')) {
+                        $content = @$_POST['content'];
+                        $fields = @$_POST['fields'];
+                        if ($content === "record" && !empty($fields)) {
+                            // Find the key for the invalid field (if present)
+                            $key = array_search('redcap_event_name', $fields);
+                            if ($key !== false) {
+                                unset($fields[$key]);
+                                $this->emDebug("Fixing redcap_event_error at row $key", "BEFORE", $_POST['fields'], "AFTER", $fields );
+                                $_POST['fields'] = $fields;
+                            }
+                        }
+                    }
+
+
                     return "PASS";
                 }
 
@@ -613,9 +636,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @return bool T/F
      */
     function validIP($cidrs) {
-        $this->emError('CIDRS', $cidrs);
+        // $this->emDebug('CIDRS', $cidrs);
         $ips = preg_split("/[\n,]/", $cidrs);
-        $this->emError($ips);
+        // $this->emDebug($ips);
 
         //check if any of the ips are valid
         foreach($ips as $ip){
@@ -638,7 +661,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         if (empty($this->username)) {
             $this->emError("Unable to parse username from token " . $this->token);
         }
-        $this->emError($this->username, $username);
+        // $this->emDebug($this->username, $username);
 
         return $this->username == $username;
     }
@@ -845,7 +868,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             WHERE api_token = '" . db_escape($token) . "'";
         $q = db_query($sql);
         if (db_num_rows($q) != 1) {
-            throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token" );
+            throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token : " . db_num_rows($q) );
         } else {
             $row = db_fetch_assoc($q);
             return array($row['username'], $row['project_id']);
@@ -876,7 +899,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $ip_mask = ~((1 << (32 - $mask)) - 1);
         $ip_ip = ip2long ($IP);
 
-        $this->emError(($ip_ip& $ip_mask), ($ip_net & $ip_mask));
+        // $this->emDebug(($ip_ip & $ip_mask), ($ip_net & $ip_mask));
 
         return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
