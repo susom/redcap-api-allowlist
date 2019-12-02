@@ -600,19 +600,20 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     // THIS FIX WHICH REMOVES redcap-event-name FROM THE QUERIED LIST OF FIELDS IN AN API RECORD
                     // QUERY.
                     if ($this->getSystemSetting('fix-redcap-event-name-error')) {
-                        $content = @$_POST['content'];
-                        $fields = @$_POST['fields'];
-                        if ($content === "record" && !empty($fields)) {
-                            // Find the key for the invalid field (if present)
+                        try {
+                            $content = @$_POST['content'];
+                            $fields = isset($_POST['fields']) ? $_POST['fields'] : array();
                             $key = array_search('redcap_event_name', $fields);
-                            if ($key !== false) {
-                                unset($fields[$key]);
-                                $this->emDebug("Fixing redcap_event_error at row $key", "BEFORE", $_POST['fields'], "AFTER", $fields );
-                                $_POST['fields'] = $fields;
+                            if ($content === "record" && $key !== false) {
+                                // Find the key for the invalid field (if present)
+                                $this->emDebug("Found redcap_event_name in fields: ", $_POST['fields'] );
+                                unset($_POST['fields'][$key]);
+                                $this->emDebug("Fixed redcap_event_name error at $key", $_POST['fields'] );
                             }
+                        } catch (\Exception $e) {
+                            $this->emDebug("Error trying to do fix-redcap-event-name-error", $this->project_id, $this->token, $e->getMessage(), $e->getLine(), $e->getTraceAsString());
                         }
                     }
-
 
                     return "PASS";
                 }
