@@ -273,7 +273,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
-                        $this->emLog('deleting log_ids', $logIds);
+                        $this->emDebug('deleting log_ids', $logIds);
 
                         $sql = 'log_id in ('. implode(',', $logIds) . ')';
                         $this->removeLogs($sql);
@@ -602,13 +602,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     if ($this->getSystemSetting('fix-redcap-event-name-error')) {
                         try {
                             $content = isset($_POST['content']) ? $_POST['content'] : false;
-                            $fields = isset($_POST['fields']) ? $_POST['fields'] : array();
-                            $key = array_search('redcap_event_name', $fields);
-                            if ($content === "record" && $key !== false) {
-                                // Find the key for the invalid field (if present)
-                                $this->emDebug("Found redcap_event_name in fields at $key", $_POST['fields'] );
-                                unset($_POST['fields'][$key]);
-                                $this->emDebug("Fixed redcap_event_name error at $key", $_POST['fields'] );
+                            $fields = isset($_POST['fields'])   ? $_POST['fields']  : false;
+                            if ($content === "record" && is_array($fields)) {
+                                $key = array_search('redcap_event_name', $fields);
+                                if ($key !== false) {
+                                    // Find the key for the invalid field (if present)
+                                    $this->emDebug("Found redcap_event_name in fields at $key", $_POST['fields'] );
+                                    unset($_POST['fields'][$key]);
+                                    $this->emDebug("Fixed redcap_event_name error at $key", $_POST['fields'] );
+                                }
                             }
                         } catch (\Exception $e) {
                             $this->emDebug("Error trying to do fix-redcap-event-name-error", $this->project_id, $this->token, $e->getMessage(), $e->getLine(), $e->getTraceAsString());
