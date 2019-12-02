@@ -601,12 +601,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     // QUERY.
                     if ($this->getSystemSetting('fix-redcap-event-name-error')) {
                         try {
-                            $content = @$_POST['content'];
+                            $content = isset($_POST['content']) ? $_POST['content'] : false;
                             $fields = isset($_POST['fields']) ? $_POST['fields'] : array();
                             $key = array_search('redcap_event_name', $fields);
                             if ($content === "record" && $key !== false) {
                                 // Find the key for the invalid field (if present)
-                                $this->emDebug("Found redcap_event_name in fields: ", $_POST['fields'] );
+                                $this->emDebug("Found redcap_event_name in fields at $key", $_POST['fields'] );
                                 unset($_POST['fields'][$key]);
                                 $this->emDebug("Fixed redcap_event_name error at $key", $_POST['fields'] );
                             }
