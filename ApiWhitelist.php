@@ -44,7 +44,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
     const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes interval to prevent default notifications from repeating rejections
-    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and is being marked inactive.  If you no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive messages notifying you of rejected requests with instructions with instructions.';
+    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and has been marked inactive.  If you are no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive rejection notification emails when requests are blocked.  For assistance with this message, please contact your REDCap support team.';
 
 
 
