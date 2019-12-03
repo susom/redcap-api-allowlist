@@ -612,7 +612,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                                     $this->emDebug("Fixed redcap_event_name error at $key", $_POST['fields'] );
                                 }
                             }
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             $this->emDebug("Error trying to do fix-redcap-event-name-error", $this->project_id, $this->token, $e->getMessage(), $e->getLine(), $e->getTraceAsString());
                         }
                     }
@@ -622,11 +622,11 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
             } // End of rules
 
-            //Fail request
+            // Fail request
             return "REJECT";
 
         } catch (Exception $e) {
-            $this->emError($e->getMessage(), $e->getLine());
+            $this->emError("Errors", $e->getMessage(), $e->getLine(), $this->project_id, $this->token);
             $this->comment = "Screen request error: " . $e->getMessage();
             return "ERROR";
         }
