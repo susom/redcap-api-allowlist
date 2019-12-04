@@ -78,7 +78,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Update the display of the sidebar link depending on configuration
      * @param $project_id
      * @param $link
-   git pu  * @return null
+     * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
@@ -626,8 +626,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             return "REJECT";
 
         } catch (Exception $e) {
-            $this->emError("Errors", $e->getMessage(), $e->getLine(), $this->project_id, $this->token);
-            $this->comment = "Screen request error: " . $e->getMessage();
+            $this->emError("Errors", $e->getMessage(), $e->getLine(), $this->project_id, $this->token, $_REQUEST);
+            $this->comment = "SCREEN REQUEST: " . $e->getMessage();
             return "ERROR";
         }
     }
@@ -871,7 +871,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             WHERE api_token = '" . db_escape($token) . "'";
         $q = db_query($sql);
         if (db_num_rows($q) != 1) {
-            throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token : " . db_num_rows($q) );
+            throw new Exception ("Returned invalid number of rows (" . db_num_rows($q) . ") in " . __METHOD__ . " from token '$token'");
         } else {
             $row = db_fetch_assoc($q);
             return array($row['username'], $row['project_id']);
