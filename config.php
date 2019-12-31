@@ -2,6 +2,8 @@
 namespace Stanford\ApiWhitelist;
 /** @var \Stanford\ApiWhitelist\ApiWhitelist $module */
 
+use \ExternalModules\ExternalModules;
+
 require APP_PATH_DOCROOT . "ControlCenter/header.php";
 
 if (!SUPER_USER) {
@@ -103,6 +105,11 @@ callJSfile("clipboard.js");
 			</div>
 			<div class="clear"></div>
     </div>
+<?php
+    if (! $module->getSystemSetting($module::KEY_WHITELIST_ACTIVE)) {
+        echo "<hr><div class='alert alert-danger text-center'>The API Whitelist is not activated.  Check the module config to activate filtering</div>";
+    }
+?>
     <hr>
 <?php
     $logOption = $module->getSystemSetting('whitelist-logging-option');
@@ -134,4 +141,9 @@ callJSfile("clipboard.js");
 </div>
 <?php
     }
+
+    // Show Control Center
+    ExternalModules::addResource(ExternalModules::getManagerJSDirectory().'control_center.js');
+    require_once APP_PATH_DOCROOT . 'ControlCenter/footer.php';
+
 ?>

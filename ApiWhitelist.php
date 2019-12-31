@@ -37,13 +37,14 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     const KEY_LOGGING_OPTION             = 'whitelist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
+    const KEY_WHITELIST_ACTIVE           = 'activate-whitelist';
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
     const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
     const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes interval to prevent default notifications from repeating rejections
-    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and is being marked inactive.  If you no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive messages notifying you of rejected requests with instructions with instructions.';
+    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and has been marked inactive.  If you are no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive rejection notification emails when requests are blocked.  For assistance with this message, please contact your REDCap support team.';
 
 
 
@@ -77,11 +78,15 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * Update the display of the sidebar link depending on configuration
      * @param $project_id
      * @param $link
-   git pu  * @return null
+     * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
             // Do nothing - show default info link
+            if($this->getSystemSetting(self::KEY_WHITELIST_ACTIVE) == 0) {
+                $link['icon'] = "cross_small_gray";
+                $link['name'] = "API Whitelist - Inactive";
+            }
         } else {
             $link['icon'] = "exclamation";
             $link['name'] = "API Whitelist - Setup Incomplete";
@@ -268,8 +273,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     $this->emDebug("Result:", $emailResult);
                     if($emailResult){
                         $this->logNotification($user);
-
-                        $this->emLog('deleting log_ids', $logIds);
+                        $this->emDebug('deleting log_ids', $logIds);
 
                         $sql = 'log_id in ('. implode(',', $logIds) . ')';
                         $this->removeLogs($sql);
@@ -408,6 +412,13 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         // Exit if this isn't an API request
         if (!self::isApiRequest()) return;
 
+        // Make sure module is active
+        if (! $this->getSystemSetting(self::KEY_WHITELIST_ACTIVE)) {
+            $this->comment = "Whitelist is not enabled";
+            $this->emDebug($this->comment);
+            return;
+        }
+
         $this->emDebug($this->getModuleName() . " is parsing API Request");
 
         $this->result = $this->screenRequest();
@@ -424,7 +435,6 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->logRequest();
                 break;
             case "REJECT":
-//                $this->checkRejectionEmailNotification();
                 $this->logRequest();
                 $this->logRejection();
                 $this->checkNotifications();
@@ -517,6 +527,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             // Load all of the whitelist rules
             $this->loadRules($this->config_pid);
 
+            // Debug post
+            // $this->emDebug("POST", $_POST);
+
             // Get the project and user from the token
             $this->loadProjectUsername($this->token);
 
@@ -576,21 +589,45 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $valid_user = $check_user ? $this->validUser($rule['username'])  : true;
                 $valid_pid  = $check_pid  ? $this->validPid($rule['project_id']) : true;
 
-                $this->emDebug($valid_ip, $valid_user, $valid_pid);
+                // $this->emDebug($valid_ip, $valid_user, $valid_pid);
 
                 if ($valid_ip && $valid_user && $valid_pid) {
                     // APPROVE API REQUEST
+
+                    // IN OLDER VERSIONS OF REDCAP, THE API WOULD ALLOW YOU TO SPECIFY THE EVENT NAME IN THE
+                    // LIST OF FIELDS TO QUERY.  WE DEPLOYED A MOBILE APP THAT HAD THIS AND AFTER AN UPGRADE
+                    // FOUND ALL API REQUESTS WERE REJECTED.  SINCE WE COULDN'T EASILY FIX THE APP, WE ADDED
+                    // THIS FIX WHICH REMOVES redcap-event-name FROM THE QUERIED LIST OF FIELDS IN AN API RECORD
+                    // QUERY.
+                    if ($this->getSystemSetting('fix-redcap-event-name-error')) {
+                        try {
+                            $content = isset($_POST['content']) ? $_POST['content'] : false;
+                            $fields = isset($_POST['fields'])   ? $_POST['fields']  : false;
+                            if ($content === "record" && is_array($fields)) {
+                                $key = array_search('redcap_event_name', $fields);
+                                if ($key !== false) {
+                                    // Find the key for the invalid field (if present)
+                                    $this->emDebug("Found redcap_event_name in fields at $key", $_POST['fields'] );
+                                    unset($_POST['fields'][$key]);
+                                    $this->emDebug("Fixed redcap_event_name error at $key", $_POST['fields'] );
+                                }
+                            }
+                        } catch (Exception $e) {
+                            $this->emDebug("Error trying to do fix-redcap-event-name-error", $this->project_id, $this->token, $e->getMessage(), $e->getLine(), $e->getTraceAsString());
+                        }
+                    }
+
                     return "PASS";
                 }
 
             } // End of rules
 
-            //Fail request
+            // Fail request
             return "REJECT";
 
         } catch (Exception $e) {
-            $this->emError($e->getMessage(), $e->getLine());
-            $this->comment = "Screen request error: " . $e->getMessage();
+            $this->emError("Errors", $e->getMessage(), $e->getLine(), $this->project_id, $this->token, $_REQUEST);
+            $this->comment = "SCREEN REQUEST: " . $e->getMessage();
             return "ERROR";
         }
     }
@@ -602,9 +639,9 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
      * @return bool T/F
      */
     function validIP($cidrs) {
-        $this->emError('CIDRS', $cidrs);
+        // $this->emDebug('CIDRS', $cidrs);
         $ips = preg_split("/[\n,]/", $cidrs);
-        $this->emError($ips);
+        // $this->emDebug($ips);
 
         //check if any of the ips are valid
         foreach($ips as $ip){
@@ -627,7 +664,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         if (empty($this->username)) {
             $this->emError("Unable to parse username from token " . $this->token);
         }
-        $this->emError($this->username, $username);
+        // $this->emDebug($this->username, $username);
 
         return $this->username == $username;
     }
@@ -834,7 +871,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             WHERE api_token = '" . db_escape($token) . "'";
         $q = db_query($sql);
         if (db_num_rows($q) != 1) {
-            throw new Exception ("Returned invalid number of hits in loadProjectUsername from token $token" );
+            throw new Exception ("Returned invalid number of rows (" . db_num_rows($q) . ") in " . __METHOD__ . " from token '$token'");
         } else {
             $row = db_fetch_assoc($q);
             return array($row['username'], $row['project_id']);
@@ -865,7 +902,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         $ip_mask = ~((1 << (32 - $mask)) - 1);
         $ip_ip = ip2long ($IP);
 
-        $this->emError(($ip_ip& $ip_mask), ($ip_net & $ip_mask));
+        // $this->emDebug(($ip_ip & $ip_mask), ($ip_net & $ip_mask));
 
         return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
     }
