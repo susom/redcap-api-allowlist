@@ -674,7 +674,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     "ip"            => $this->ip,
                     "username"      => $this->username,
                     "project_id"    => $this->project_id,
-                    "rule_id"       => $this->rule_id,
+                    "rule_id"       => null,
                     "comment"       => $this->comment));
 
                 //REDCap::logEvent("API Whitelist Request $this->result", $cm, "", null, null, $this->project_id);
@@ -711,7 +711,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             db_real_escape_string($this->username),
             db_real_escape_string($this->project_id),
             db_real_escape_string($this->result),
-            db_real_escape_string(empty($this->rule_id) ? "NULL" : $this->rule_id),
+            db_real_escape_string("NULL"),
             db_real_escape_string($comment)
         );
         db_query($sql);
