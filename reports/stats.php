@@ -1,7 +1,7 @@
 <?php
 
-namespace Stanford\ApiWhitelist;
-/** @var \Stanford\ApiWhitelist\ApiWhitelist $module */
+namespace Stanford\ApiAllowlist;
+/** @var \Stanford\ApiAllowlist\ApiAllowlist $module */
 
 require APP_PATH_DOCROOT . "ControlCenter/header.php";
 
@@ -65,6 +65,6 @@ $url .=  (APP_PATH_WEBROOT . 'ProjectSetup/index.php?pid=' . $module->config_pid
     </table>
 
     <!--  AJAX endpoint for JS  -->
-    <input type="hidden" id="ApiWhitelistEndpoint" value="<?php echo $module->getUrl('routes.php'); ?>" class="hidden"/>
+    <input type="hidden" id="ApiAllowlistEndpoint" value="<?php echo $module->getUrl('routes.php'); ?>" class="hidden"/>
 
 </div>

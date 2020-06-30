@@ -1,6 +1,6 @@
 <?php
-namespace Stanford\ApiWhitelist;
-/** @var \Stanford\ApiWhitelist\ApiWhitelist $module */
+namespace Stanford\ApiAllowlist;
+/** @var \Stanford\ApiAllowlist\ApiAllowlist $module */
 
 use \ExternalModules\ExternalModules;
 
@@ -24,7 +24,7 @@ $module->validateSetup();
 <div class="container">
     <h5><?php echo $module->getModuleName()?></h5>
     <p>
-        This module blocks all API requests containing a 'token' unless they have been whitelisted via a rule.  Rules
+        This module blocks all API requests containing a 'token' unless they have been added to the allowlist via a rule.  Rules
         can be based on project_id, network address, and user.  Rejected requests will see an error message directing
         them to contact you for assistance.  You can customize these settings in the module configuration.
     </p>
@@ -35,14 +35,14 @@ if ($module->config_valid != 1) {
 
     ?>
     <p>
-        There are two ways to setup your REDCap API Whitelist Rules project.
+        There are two ways to setup your REDCap API Allowlist Rules project.
         <ol>
             <li>The first is to check the first time setup option on the configuration page. </li>
-            <li>The second is to manually setup your API Whitelist Configuration project by downloading the following XML REDCap project template.
+            <li>The second is to manually setup your API Allowlist Configuration project by downloading the following XML REDCap project template.
                 <br>
                 Return to the EM setup and set the PID to match this newly created project.
                 <br>
-                <a href="<?php echo $module->getUrl("assets/ApiWhitelistRulesProject.xml") ?>">Download Project XML</a>
+                <a href="<?php echo $module->getUrl("assets/ApiAllowlistRulesProject.xml") ?>">Download Project XML</a>
             </li>
         </ol>
     </p>
@@ -67,20 +67,20 @@ $url .=  (APP_PATH_WEBROOT . 'ProjectSetup/index.php?pid=' . $module->config_pid
 $survey_url = $module->getRulesPublicSurveyUrl($module->config_pid);
 callJSfile("clipboard.js");
 ?>
-    <h6>The API Whitelist Rules Project</h6>
+    <h6>The API Allowlist Rules Project</h6>
     <p>
         Upon activation, a new project was created to store your rules.  Typical rules include local IP ranges, VPN IP
         ranges, or projects that are using the REDCap Mobile App for remote data collection and sync.
     </p>
     <div style="text-align:center;">
-        <button class = 'btn btn-primaryrc' onclick="window.open('<?php echo $url ?>')">View API Whitelist Rules Project
+        <button class = 'btn btn-primaryrc' onclick="window.open('<?php echo $url ?>')">View API Allowlist Rules Project
             <span class="badge badge-danger">PID <?php echo $module->config_pid ?></span>
         </button>
     </div>
     <div>
         <p>
-            Your API Whitelist Rules project has a public survey url that can be used by end-users to request new
-            Whitelist rules.  This url is likely part of your rejection message and email in the EM config already.
+            Your API Allowlist Rules project has a public survey url that can be used by end-users to request new
+            Allowlist rules.  This url is likely part of your rejection message and email in the EM config already.
             You should review this project and ensure the questions asked meet your requirements.
         </p>
         <!-- Public survey URL -->
@@ -106,13 +106,13 @@ callJSfile("clipboard.js");
 			<div class="clear"></div>
     </div>
 <?php
-    if (! $module->getSystemSetting($module::KEY_WHITELIST_ACTIVE)) {
-        echo "<hr><div class='alert alert-danger text-center'>The API Whitelist is not activated.  Check the module config to activate filtering</div>";
+    if (! $module->getSystemSetting($module::KEY_ALLOWLIST_ACTIVE)) {
+        echo "<hr><div class='alert alert-danger text-center'>The API Allowlist is not activated.  Check the module config to activate filtering</div>";
     }
 ?>
     <hr>
 <?php
-    $logOption = $module->getSystemSetting('whitelist-logging-option');
+    $logOption = $module->getSystemSetting('allowlist-logging-option');
     if( $logOption == 1) {
 ?>
     <div>
@@ -122,12 +122,12 @@ callJSfile("clipboard.js");
         <ol>
             <li>
                 <p>Cumulative API response duration by project/rule</p>
-                <code>SELECT SUM(duration), project_id, rule_id FROM redcap_log_api_whitelist group by rule_id,
+                <code>SELECT SUM(duration), project_id, rule_id FROM redcap_log_api_allowlist group by rule_id,
                     project_id ORDER BY SUM(duration) desc </code>
             </li>
             <li>
-                <p>Most recent whitelist rejections</p>
-                <code>SELECT project_id, ip_address, ts, comment FROM redcap_log_api_whitelist WHERE rule_id IS NULL
+                <p>Most recent allowlist rejections</p>
+                <code>SELECT project_id, ip_address, ts, comment FROM redcap_log_api_allowlist WHERE rule_id IS NULL
                     order by ts desc</code>
             </li>
         </ol>
