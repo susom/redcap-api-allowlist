@@ -376,10 +376,10 @@ Enter 1 or more CIDR blocks separated by a comma or new-line</TranslatedText><re
 		<Question><TranslatedText>Expiration Date</TranslatedText></Question>
 	</ItemDef>
 	<ItemDef OID="desc_active_warning" Name="desc_active_warning" DataType="text" Length="999" redcap:Variable="desc_active_warning" redcap:FieldType="descriptive" redcap:BranchingLogic="datediff([expiration_date],&quot;today&quot;,&quot;d&quot;,&quot;ymd&quot;,true) &gt; 0 OR [enabled(1)] = &quot;0&quot; OR ( sum([allowlist_type(1)],[allowlist_type(2)],[allowlist_type(3)]) = 0 )">
-		<Question><TranslatedText>THIS WHITELIST RULE IS NOT ACTIVE</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-danger text-center&#039;&gt;&lt;span class=&#039;badge&#039;&gt;THIS WHITELIST RULE IS NOT ACTIVE&lt;/span&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<Question><TranslatedText>THIS ALLOWLIST RULE IS NOT ACTIVE</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-danger text-center&#039;&gt;&lt;span class=&#039;badge&#039;&gt;THIS ALLOWLIST RULE IS NOT ACTIVE&lt;/span&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
 	</ItemDef>
 	<ItemDef OID="desc_active_warning_2" Name="desc_active_warning_2" DataType="text" Length="999" redcap:Variable="desc_active_warning_2" redcap:FieldType="descriptive" redcap:BranchingLogic="( [expiration_date] = &#039;&#039; OR datediff([expiration_date],&quot;today&quot;,&quot;d&quot;,&quot;ymd&quot;,true) &lt; 0 ) AND [enabled(1)] = &quot;1&quot; AND ( sum([allowlist_type(1)],[allowlist_type(2)],[allowlist_type(3)]) &gt; 0 )">
-		<Question><TranslatedText>THIS WHITELIST RULE IS ACTIVE</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-success text-center&#039;&gt;&lt;span class=&#039;badge&#039;&gt;THIS WHITELIST RULE IS ACTIVE&lt;/span&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<Question><TranslatedText>THIS ALLOWLIST RULE IS ACTIVE</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-success text-center&#039;&gt;&lt;span class=&#039;badge&#039;&gt;THIS ALLOWLIST RULE IS ACTIVE&lt;/span&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
 	</ItemDef>
 	<ItemDef OID="enabled___1" Name="enabled___1" DataType="boolean" Length="1" redcap:Variable="enabled" redcap:FieldType="checkbox" redcap:FieldNote="You must check to enable this rule">
 		<Question><TranslatedText></TranslatedText></Question>

@@ -2,8 +2,7 @@
 This external module adds additional IP and user-based constraints on API access to REDCap.
 
 ## How it works
-This module provides a listing mechanism to allow defined projects, users, and IP ranges to use the API.  All other requests
-not present on this list are blocked.
+This module provides a security filter to all API requests, blocking all API requests by default and only allowing permitted API requests based on project, user, or IP range.
 
 Permission to use the API is controlled by the 'API Allowlist Rules Project'.  The EM will automatically
 create this project if you select the 'first-time-setup' option in the config.
