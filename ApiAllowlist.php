@@ -1,5 +1,5 @@
 <?php
-namespace Stanford\ApiWhitelist;
+namespace Stanford\ApiAllowlist;
 
 include_once "emLoggerTrait.php";
 include_once "createProjectFromXML.php";
@@ -8,7 +8,7 @@ use \Exception;
 use \Logging;
 
 
-class ApiWhitelist extends \ExternalModules\AbstractExternalModule
+class ApiAllowlist extends \ExternalModules\AbstractExternalModule
 {
     use emLoggerTrait;
 
@@ -17,7 +17,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     public $username;          // request username
     public $project_id;        // request project_id
 
-    public $required_whitelist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
+    public $required_allowlist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
     public $config_valid;      // configuration valid
     public $config_errors;     // array of configuration errors
     public $logging_option;    // configured log option
@@ -31,20 +31,20 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     public $comment;           // Text comment
     public $log_id;            // log_id if last inserted db log
 
-    const LOG_TABLE                      = 'redcap_log_api_whitelist';
-    const RULES_SURVEY_FORM_NAME         = 'api_whitelist_request';
-    const REQUIRED_WHITELIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'enabled');
-    const KEY_LOGGING_OPTION             = 'whitelist-logging-option';
+    const LOG_TABLE                      = 'redcap_log_api_allowlist';
+    const RULES_SURVEY_FORM_NAME         = 'api_allowlist_request';
+    const REQUIRED_ALLOWLIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'enabled');
+    const KEY_LOGGING_OPTION             = 'allowlist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
-    const KEY_WHITELIST_ACTIVE           = 'activate-whitelist';
+    const KEY_ALLOWLIST_ACTIVE           = 'activate-allowlist';
     const KEY_VALID_CONFIGURATION_ERRORS = 'configuration-validation-errors';
     const KEY_CONFIG_PID                 = 'rules-pid';
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
     const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
     const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
     const MIN_EMAIL_RESEND_DURATION      = 15; //minutes interval to prevent default notifications from repeating rejections
-    const EXPIRED_RULE_EMAIL             = 'An API Whitelist rule associated with your account has expired and has been marked inactive.  If you are no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive rejection notification emails when requests are blocked.  For assistance with this message, please contact your REDCap support team.';
+    const EXPIRED_RULE_EMAIL             = 'An API Allowlist rule associated with your account has expired and has been marked inactive.  If you are no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive rejection notification emails when requests are blocked.  For assistance with this message, please contact your REDCap support team.';
 
 
 
@@ -83,13 +83,13 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
     function redcap_module_link_check_display($project_id, $link) {
         if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
             // Do nothing - show default info link
-            if($this->getSystemSetting(self::KEY_WHITELIST_ACTIVE) == 0) {
+            if($this->getSystemSetting(self::KEY_ALLOWLIST_ACTIVE) == 0) {
                 $link['icon'] = "cross_small_gray";
-                $link['name'] = "API Whitelist - Inactive";
+                $link['name'] = "API Allowlist - Inactive";
             }
         } else {
             $link['icon'] = "exclamation";
-            $link['name'] = "API Whitelist - Setup Incomplete";
+            $link['name'] = "API Allowlist - Setup Incomplete";
         }
         return $link;
     }
@@ -105,7 +105,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
             global $homepage_contact_email;
 
-            $newProjectID = $this->createAPIWhiteListRulesProject();
+            $newProjectID = $this->createAPIAllowListRulesProject();
             if ($newProjectID > 0) {
                 $url = $this->getRulesPublicSurveyUrl($newProjectID);
                 $this->emDebug("Got survey hash of $url");
@@ -121,7 +121,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
 
                 $this->setSystemSetting('first-time-setup', false);
-                $this->setSystemSetting('whitelist-logging-option','1');
+                $this->setSystemSetting('allowlist-logging-option','1');
             }
         }
     }
@@ -268,7 +268,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     $table .= "</tbody></table>";
                     $messageBody = $header . "<hr>" . $table;
                     $this->emDebug($email, $rejectionEmailFrom, $messageBody);
-                    $emailResult = REDCap::email($email,$rejectionEmailFrom,'API whitelist rejection notice', $messageBody);
+                    $emailResult = REDCap::email($email,$rejectionEmailFrom,'API Allowlist rejection notice', $messageBody);
 
                     $this->emDebug("Result:", $emailResult);
                     if($emailResult){
@@ -345,7 +345,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         // Make sure configuration project is set
         $this->config_pid = $this->getSystemSetting(self::KEY_CONFIG_PID);
         if (empty($this->config_pid)) {
-            $config_errors[] = "Missing API Whitelist Configuration project_id setting in module setup";
+            $config_errors[] = "Missing API Allowlist Configuration project_id setting in module setup";
         } else {
             // Verify that the project has the right fields
             $q = REDCap::getDataDictionary($this->config_pid, 'json');
@@ -356,8 +356,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             $fields = array();
             foreach ($dictionary as $field) $fields[] = $field['field_name'];
 
-            $missing = array_diff(self::REQUIRED_WHITELIST_FIELDS, $fields);
-            if (!empty($missing)) $config_errors[] = "The API Whitelist project (#$this->config_pid) is missing required fields: " . implode(", ", $missing);
+            $missing = array_diff(self::REQUIRED_ALLOWLIST_FIELDS, $fields);
+            if (!empty($missing)) $config_errors[] = "The API Allowlist project (#$this->config_pid) is missing required fields: " . implode(", ", $missing);
         }
 
         // Check for custom log table
@@ -368,7 +368,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                 $this->emDebug("Trying to create custom logging table in database: " . self::LOG_TABLE);
                 if (! $this->createLogTable()) {
                     $this->emDebug("Not able to create log table from script - perhaps db user doesn't have permissions");
-                    $config_errors[] = "Error creating log table automatically - check the control center API Whitelist link for instructions";
+                    $config_errors[] = "Error creating log table automatically - check the control center API Allowlist link for instructions";
                 } else {
                     $this->emDebug("Custom logging table (". self::LOG_TABLE . ") created from script");
 
@@ -413,8 +413,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
         if (!self::isApiRequest()) return;
 
         // Make sure module is active
-        if (! $this->getSystemSetting(self::KEY_WHITELIST_ACTIVE)) {
-            $this->comment = "Whitelist is not enabled";
+        if (! $this->getSystemSetting(self::KEY_ALLOWLIST_ACTIVE)) {
+            $this->comment = "Allowlist is not enabled";
             $this->emDebug($this->comment);
             return;
         }
@@ -451,12 +451,12 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
-     * Function that dynamically creates and assigns a API whitelist Redcap project using a supertoken
+     * Function that dynamically creates and assigns a API Allowlist Redcap project using a supertoken
      * @return boolean success
      * @throws Exception
      */
-    public function createAPIWhiteListRulesProject(){
-        $odmFile = $this->getModulePath() . 'assets/APIWhitelistRulesProject.xml';
+    public function createAPIallowListRulesProject(){
+        $odmFile = $this->getModulePath() . 'assets/APIAllowlistRulesProject.xml';
         $this->emDebug("ODM FILE",$odmFile);
         $newProjectHelper = new createProjectFromXML($this);
         $superToken = $newProjectHelper->getSuperToken(USERID);
@@ -492,7 +492,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
 
 
     /**
-     * Screen the API request against the whitelist
+     * Screen the API request against the allowlist
      * Set the $this->result to "PASS" / "ERROR" / "REJECT"
      * A result of "SKIP" means that we don't do anything
      * @return string RESULT: "PASS" / "ERROR" / "REJECT" / "SKIP"
@@ -524,7 +524,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             // Get the configuration project
             $this->config_pid = $this->getSystemSetting(self::KEY_CONFIG_PID);
 
-            // Load all of the whitelist rules
+            // Load all of the allowlist rules
             $this->loadRules($this->config_pid);
 
             // Debug post
@@ -534,16 +534,16 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
             $this->loadProjectUsername($this->token);
 
             if(empty($this->rules)){
-                $this->emLog('No current rules are set in current whitelist config');
+                $this->emLog('No current rules are set in current allowlist config');
             }
 
             foreach ($this->rules as $rule) {
                 //check all records if pass, else reject
                 $this->rule_id = $rule['rule_id'];
 
-                $check_ip = $rule['whitelist_type___1'];
-                $check_user = $rule['whitelist_type___2'];
-                $check_pid = $rule['whitelist_type___3'];
+                $check_ip = $rule['allowlist_type___1'];
+                $check_user = $rule['allowlist_type___2'];
+                $check_pid = $rule['allowlist_type___3'];
 
                 // Verify rule has not expired
                 $expires = $rule['expiration_date'];
@@ -560,7 +560,7 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     // Let's email the user(s)
                     $to = implode(", ", $emails);
                     $from = $this->getSystemSetting('rejection-email-from-address');
-                    $subject = "REDCap API Whitelist Rule #" . $this->rule_id . " Expiration Warning";
+                    $subject = "REDCap API allowlist Rule #" . $this->rule_id . " Expiration Warning";
                     $message = "<p>Dear REDCap API User</p><p>" . self::EXPIRED_RULE_EMAIL . "</p>";
                     $message .= "<div><b>" . $subject . "</b></div>";
                     if (!empty($rule['request_notes'])) $message .= "<div><i>" . $rule['request_notes'] . "</i></div>";
@@ -714,9 +714,8 @@ class ApiWhitelist extends \ExternalModules\AbstractExternalModule
                     "rule_id"       => null,
                     "comment"       => $this->comment));
 
-                //REDCap::logEvent("API Whitelist Request $this->result", $cm, "", null, null, $this->project_id);
                 // To override the username I'm using the direct method call instead of REDCap::logEvent
-                Logging::logEvent("", self::LOG_TABLE, "OTHER", null, $cm, "API Whitelist Request $this->result", "", $this->username, $this->project_id);
+                Logging::logEvent("", self::LOG_TABLE, "OTHER", null, $cm, "API Allowlist Request $this->result", "", $this->username, $this->project_id);
                 break;
         }
         // Log to EmLogger

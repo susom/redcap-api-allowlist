@@ -1,6 +1,6 @@
 <?php
-namespace Stanford\ApiWhitelist;
-/** @var \Stanford\ApiWhitelist\ApiWhitelist $this */
+namespace Stanford\ApiAllowlist;
+/** @var \Stanford\ApiAllowlist\ApiAllowlist $this */
 
 /**
  * This trait can be used with External Modules to enable the Stanford emLogger module

@@ -1,6 +1,6 @@
-var ApiWhitelist = ApiWhitelist || {};
+var ApiAllowlist = ApiAllowlist || {};
 
-ApiWhitelist.config = function() {
+ApiAllowlist.config = function() {
 
     // Remove two fields that don't apply in config for this module
     $('tr[field="enabled"]').addClass('hidden');

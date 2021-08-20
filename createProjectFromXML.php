@@ -1,15 +1,15 @@
 <?php
 
 
-namespace Stanford\ApiWhitelist;
+namespace Stanford\ApiAllowlist;
 
 use \RedCapDB;
 
 /**
  * Class createProjectFromXML
  * Helper class for dynamic creation REDcap projects
- * @package Stanford\ApiWhitelist
- * @property ApiWhitelist $module
+ * @package Stanford\ApiAllowlist
+ * @property ApiAllowlist $module
  * @property RedCapDB $db
  */
 class createProjectFromXML
@@ -97,7 +97,7 @@ class createProjectFromXML
             $this->module->emError('INVALID : Cannot get contents of odm');
         } else {
             $data = array(
-                "project_title" => "API Whitelist EM Rules",
+                "project_title" => "API Allowlist EM Rules",
                 "purpose"   => 4,
                 "is_longitudinal" => 0
             );
