@@ -275,7 +275,7 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
                         $this->logNotification($user);
                         $this->emDebug('deleting log_ids', $logIds);
 
-                        $sql = 'log_id in ('. implode(',', $logIds) . ') and project_id is NULL';
+                        $sql = 'log_id in ('. implode(',', $logIds) . ') and (project_id is null or project_id > 0)';
                         $this->removeLogs($sql, []);
                     } else {
                         $this->emError('Email not sent', $messageBody , $rejectionEmailFrom, $email);
@@ -422,6 +422,8 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
         $this->emDebug($this->getModuleName() . " is parsing API Request");
 
         $this->result = $this->screenRequest();
+
+        $this->emDebug("Result: " . $this->result);
 
         switch ($this->result) {
             case "SKIP":
@@ -623,6 +625,7 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
             } // End of rules
 
             // Fail request
+            $this->rule_id = null;
             return "REJECT";
 
         } catch (Exception $e) {
@@ -711,7 +714,7 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
                     "ip"            => $this->ip,
                     "username"      => $this->username,
                     "project_id"    => $this->project_id,
-                    "rule_id"       => null,
+                    "rule_id"       => $this->rule_id,
                     "comment"       => $this->comment));
 
                 // To override the username I'm using the direct method call instead of REDCap::logEvent
@@ -747,7 +750,7 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
             db_real_escape_string($this->username),
             db_real_escape_string($this->project_id),
             db_real_escape_string($this->result),
-            db_real_escape_string("NULL"),
+            db_real_escape_string($this->rule_id),
             db_real_escape_string($comment)
         );
         db_query($sql);
