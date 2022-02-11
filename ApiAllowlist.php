@@ -275,8 +275,8 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
                         $this->logNotification($user);
                         $this->emDebug('deleting log_ids', $logIds);
 
-                        $sql = 'log_id in ('. implode(',', $logIds) . ')';
-                        $this->removeLogs($sql);
+                        $sql = 'log_id in ('. implode(',', $logIds) . ') and project_id is NULL';
+                        $this->removeLogs($sql, []);
                     } else {
                         $this->emError('Email not sent', $messageBody , $rejectionEmailFrom, $email);
                     }
