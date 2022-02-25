@@ -58,14 +58,26 @@ class createProjectFromXML
      * @param $fieldname
      * @param $sql
      */
-    public function convertDynamicSQLField($project_id, $fieldname, $sql){
-        $sql = sprintf("update redcap_metadata set element_type = 'sql' , element_enum = '%s'
-        where project_id = %d and field_name = '%s' limit 1",
+    public function convertDynamicSQLField($project_id, $fieldname, $sql, $autocomplete=true){
+        $sql = sprintf(
+            "update redcap_metadata
+            set element_type = 'sql' , element_enum = '%s'
+            where project_id = %d and field_name = '%s' limit 1",
             db_real_escape_string($sql),
             db_real_escape_string($project_id),
             db_real_escape_string($fieldname)
         );
         $result = db_query($sql);
+        if ($autocomplete && $result) {
+            $sql = sprintf(
+                "update redcap_metadata
+                set element_validation_type = 'autocomplete'
+                where project_id = %d and field_name = '%s' limit 1",
+                db_real_escape_string($project_id),
+                db_real_escape_string($fieldname)
+            );
+            $result = db_query($sql);
+        }
         $this->module->emDebug("result", $result);
     }
 
