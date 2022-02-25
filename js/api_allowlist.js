@@ -1,9 +1,14 @@
+/*  This JS is injected into the External Module configuration page and helps display any configuration errors
+    to users who are setting up the project
+ */
+
 var ApiAllowlist = ApiAllowlist || {};
 
 ApiAllowlist.config = function() {
 
     // Remove two fields that don't apply in config for this module
     $('tr[field="enabled"]').addClass('hidden');
+    $('tr[field="user-activate-permission"]').addClass('hidden');
     $('tr[field="discoverable-in-project"]').addClass('hidden');
 
 

@@ -1,13 +1,11 @@
 <?php
-
-
 namespace Stanford\ApiAllowlist;
 
 use \RedCapDB;
 
 /**
  * Class createProjectFromXML
- * Helper class for dynamic creation REDcap projects
+ * Helper class for dynamic creation of a REDCap projects
  * @package Stanford\ApiAllowlist
  * @property ApiAllowlist $module
  * @property RedCapDB $db
@@ -21,6 +19,7 @@ class createProjectFromXML
         $this->module = $module;
         $this->db = new RedCapDB();
     }
+
 
     /**
      * Get/Create a Super Token
@@ -50,7 +49,7 @@ class createProjectFromXML
     /**
      * When importing an XML file, dynamic SQL is not added.  Use this method to convert an XML field back into
      * dynamic sql as:
-     *      convertDyanicSQLField(
+     *      convertDynamicSQLField(
      *          $ProjectID,
      *          'username',
      *          'select username, CONCAT_WS(" ", CONCAT("[", username, "]"), user_firstname, user_lastname) from redcap_user_information;'
@@ -59,15 +58,26 @@ class createProjectFromXML
      * @param $fieldname
      * @param $sql
      */
-    public function convertDyanicSQLField($project_id, $fieldname, $sql){
-        $sql = sprintf("update redcap_metadata set element_type = 'sql' , element_enum = '%s'
-        where project_id = %d and field_name = '%s' limit 1",
+    public function convertDynamicSQLField($project_id, $fieldname, $sql, $autocomplete=true){
+        $sql = sprintf(
+            "update redcap_metadata
+            set element_type = 'sql' , element_enum = '%s'
+            where project_id = %d and field_name = '%s' limit 1",
             db_real_escape_string($sql),
             db_real_escape_string($project_id),
             db_real_escape_string($fieldname)
         );
-
         $result = db_query($sql);
+        if ($autocomplete && $result) {
+            $sql = sprintf(
+                "update redcap_metadata
+                set element_validation_type = 'autocomplete'
+                where project_id = %d and field_name = '%s' limit 1",
+                db_real_escape_string($project_id),
+                db_real_escape_string($fieldname)
+            );
+            $result = db_query($sql);
+        }
         $this->module->emDebug("result", $result);
     }
 

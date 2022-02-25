@@ -1,175 +1,169 @@
 {
-  "name": "API Allowlist",
-
-  "namespace":"Stanford\\ApiAllowlist",
-
-  "description": "Secures your REDCap API through use of a 'Allowlist' based on IP address, username, and project.  All requests not configured under the allowlist will be blocked.",
-
-  "versions": [
-    { "0.1": "Initial" }
-  ],
-
-  "authors": [
-    {
-      "name": "Andrew Martin",
-      "email": "andy123@stanford.edu",
-      "institution": "Stanford University"
-    },
-    {
-      "name": "Jordan Schultz",
-      "email": "jmschult@stanford.edu",
-      "institution": "Stanford University"
-    }
-  ],
-
-  "permissions": [
-    "redcap_every_page_before_render",
-    "redcap_module_system_enable",
-    "redcap_module_link_check_display",
-    "redcap_module_save_configuration"
-  ],
-
-  "enable-every-page-hooks-on-system-pages": true,
-
-  "no-auth-pages": [
-  ],
-  "crons": [
-    {
-      "cron_name": "rejection_notifiation_emails",
-      "cron_description": "Cron that runs every 10 minutes to email users' API rejections if valid",
-      "method": "cronRejectionNotifications",
-      "cron_frequency": "600",
-      "cron_max_run_time": "60"
-    }
-  ],
-  "links": {
-    "control-center": [
-      {
-        "name": "API Allowlist Info",
-        "icon": "gear",
-        "url": "config.php"
-      }
-    ],
-    "project": [
-    ]
-  },
-
-  "system-settings": [
-    {
-      "key": "instructions",
-      "name": "<h5><b>Description</b></h5><p>The API Allowlist inspects all incoming API requests and only permits those that match an API Allowlist Rule.  Rules are stored in an API Allowlist Rules Project and can be constructed based on IP address/range, project, and username.  The Rules project can also be used as an Exception Request survey for your institution users to request a new Rule.</p><p>Examples of allowlist rules are: your VPN network range in CIDR format, a single external server IP address for a collaborator, or a specific project & user that needs to use the REDCap Mobile app from abroad.</p><p>If this is your first time enabling this module, use the 'First Time Setup' to create your rules project.  Additional information is available from the  'API Allowlist Info' link on the left sidebar of the control center.</p><br><div class='alert alert-warning'><i>This module, once enabled and configured, will apply a filter to all API requests for all projects (including the Mobile App).  It DOES NOT filter external module api-urls.</i></div>",
-      "type": "descriptive"
-    },
-    {
-      "key": "first-time-setup",
-      "name": "<b>First Time Setup</b><br>If this is your first time configuring, check this box and press save<br>This will automatically create a new API Allowlist Rules Project",
-      "required": false,
-      "type": "checkbox",
-      "branchingLogic" : {
-        "field": "rules-pid",
-        "value": ""
-      }
-    },
-    {
-      "key": "configuration-validation-errors",
-      "name": "",
-      "required": false,
-      "readonly": true,
-      "type": "text"
-    },
-    {
-      "key": "rules-pid",
-      "name": "<b>API Allowlist Rules Project</b><br>This module stores all allowlist rules in a redcap project.",
-      "required": false,
-      "type": "project-id",
-      "source": "js/api_allowlist.js",
-      "functionName": "ApiAllowlist.config",
-      "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
-      }
-    },
-    {
-      "key": "rejection-message",
-      "name": "<b>Rejection Help Message</b><br>When a request does not match a allowlist rule, the user will receive a HTTP 403 response and the text entered here.<br>For example, you might give directions to the public survey url of your allowlist rules project.",
-      "required": false,
-      "type": "textarea",
-      "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
-      }
-    },
-    {
-      "key": "rejection-email-notification",
-      "name": "<b>Notify Rejected Users By Email</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per 15 minutes will be sent.",
-      "required": false,
-      "type": "checkbox",
-      "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
-      }
-    },
-    {
-      "key": "rejection-email-header",
-      "name": "<b>Rejection Email Header</b><br>This field will be included in the email for rejected API requests",
-      "required": false,
-      "type": "rich-text",
-      "branchingLogic" : {
-        "field": "rejection-email-notification",
-        "value": "1"
-      }
-    },
-    {
-      "key": "rejection-email-from-address",
-      "name": "<b>Rejection Email From Address</b><br>(e.g. no-reply@myredcap.com or help@myredcap.com)",
-      "required": false,
-      "type": "email",
-      "branchingLogic" : {
-        "field": "rejection-email-notification",
-        "value": "1"
-      }
-    },
-    {
-      "key": "allowlist-logging-option",
-      "name": "<b>API Allowlist Logging Options</b><br>You can log all api attempts through one of these options:<br><ol><li>No Logging</li><li>Database Table: A new table will be added to your schema that records each api call, the user, the project, ip, and duration.  This is a great way to identify who is using your API and how much 'cpu-time' they are spending.  This is the recommended option.</li></ol><i>Note: If you install the emLogger EM, you will automatically get logging to file as configured in your emLogger.  You can clear/rotate the log file anytime you like</i>",
-      "required": false,
-      "type": "radio",
-      "choices":[
+    "name": "API Allowlist",
+    "namespace": "Stanford\\ApiAllowlist",
+    "description": "Secures your REDCap API through use of 'Allowlist' rules based on IP address, username, and project id.  All requests not configured under the allowlist rules project will be blocked.",
+    "framework-version": 8,
+    "authors": [
         {
-          "name" : "0. No Logging",
-          "value" : "0"
+            "name": "Andrew Martin",
+            "email": "andy123@stanford.edu",
+            "institution": "Stanford University"
         },
         {
-          "name" : "1. Custom Table <small><sup>*</sup>Recommended</small>",
-          "value" : "1"
+            "name": "Jordan Schultz",
+            "email": "jmschult@stanford.edu",
+            "institution": "Stanford University"
         }
-      ],
-      "branchingLogic" : {
-        "field": "first-time-setup",
-        "value": "0"
-      }
+    ],
+    "permissions": [
+        "redcap_every_page_before_render",
+        "redcap_module_system_enable",
+        "redcap_module_link_check_display",
+        "redcap_module_save_configuration"
+    ],
+    "enable-every-page-hooks-on-system-pages": true,
+    "no-auth-pages": [
+    ],
+    "crons": [
+        {
+            "cron_name": "api_allowlist_rejection_notifications",
+            "cron_description": "Cron that runs every 10 minutes to notify users of API rejections",
+            "method": "cronRejectionNotifications",
+            "cron_frequency": "600",
+            "cron_max_run_time": "60"
+        }
+    ],
+    "links": {
+        "control-center": [
+            {
+                "name": "API Allowlist Info",
+                "icon": "fas fa-door-open",
+                "url": "pages/config.php"
+            }
+        ],
+        "project": [
+        ]
     },
-    {
-      "key": "fix-redcap-event-name-error",
-      "name": "<b>Fix redcap_event_name issue</b><br>API queries used to allow you to ask for the redcap_event_name as a field but now this throws an exception.  If you check this box, the API allowlist will remove the redcap_event_name field request from incoming API record queries preventing the error.",
-      "required": false,
-      "type": "checkbox"
-    },
-    {
-      "key": "activate-allowlist",
-      "name": "<b>Activate allowlist</b><br>Once your server is configured and your rules are in-place, you can check this box to activate filtering based on your allowlist",
-      "required": false,
-      "type": "checkbox"
-    },
-    {
-      "key": "enable-system-debug-logging",
-      "name": "<b>Enable Debug Logging</b><br>If you have the Stanford emLogger external module installed and configured, you can enable additional debug-level logging through this checkbox</b>",
-      "required": false,
-      "type": "checkbox"
+    "system-settings": [
+        {
+            "key": "instructions",
+            "name": "<h5><b>Description</b></h5><p>The API Allowlist inspects all incoming API requests and only permits those that match an API Allowlist Rule.  Rules are stored in an API Allowlist Rules Project and can be constructed based on IP address/range, project, and username.  The Rules project can also be used as an Exception Request survey for your institution users to request a new Rule.</p><p>Examples of allowlist rules are: your VPN network range in CIDR format, a single external server IP address for a collaborator, or a specific project & user that needs to use the REDCap Mobile app from abroad.</p><p>If this is your first time enabling this module, use the 'First Time Setup' to create your rules project.  Additional information is available from the  'API Allowlist Info' link on the left sidebar of the control center.</p><br><div class='alert alert-warning'><i>This module, once enabled and configured, will apply a filter to all API requests for all projects, including the REDCap Mobile App.<br>It DOES NOT filter external module api-urls though so it should not affect other modules.</i></div>",
+            "type": "descriptive"
+        },
+        {
+            "key": "first-time-setup",
+            "name": "<b>First Time Setup</b><br>If this is your first time configuring, check this box and press save<br>This will automatically create a new API Allowlist Rules Project",
+            "required": false,
+            "type": "checkbox",
+            "branchingLogic": {
+                "field": "rules-pid",
+                "value": ""
+            }
+        },
+        {
+            "key": "configuration-validation-errors",
+            "name": "",
+            "required": false,
+            "readonly": true,
+            "type": "text"
+        },
+        {
+            "key": "rules-pid",
+            "name": "<b>API Allowlist Rules Project</b><br>This module stores all allowlist rules in a redcap project.",
+            "required": false,
+            "type": "project-id",
+            "source": "js/api_allowlist.js",
+            "functionName": "ApiAllowlist.config",
+            "branchingLogic": {
+                "field": "first-time-setup",
+                "value": "0"
+            }
+        },
+        {
+            "key": "rejection-message",
+            "name": "<b>Rejection Help Message</b><br>When a request does not match a allowlist rule, the user will receive a HTTP 403 response and the text entered here.<br>For example, you might give directions to the public survey url of your allowlist rules project.",
+            "required": false,
+            "type": "textarea",
+            "branchingLogic": {
+                "field": "first-time-setup",
+                "value": "0"
+            }
+        },
+        {
+            "key": "rejection-email-notification",
+            "name": "<b>Notify Rejected Users By Email</b><br>When a request is rejected, do you want to additionally notify the API token user's email with the rejection message.  This can be useful if they do not programmatically review the text in the 403 authorization invalid response.  A maximum of one email per 15 minutes will be sent.",
+            "required": false,
+            "type": "checkbox",
+            "branchingLogic": {
+                "field": "first-time-setup",
+                "value": "0"
+            }
+        },
+        {
+            "key": "rejection-email-header",
+            "name": "<b>Rejection Email Header</b><br>This field will be included in the email for rejected API requests",
+            "required": false,
+            "type": "rich-text",
+            "branchingLogic": {
+                "field": "rejection-email-notification",
+                "value": "1"
+            }
+        },
+        {
+            "key": "rejection-email-from-address",
+            "name": "<b>Rejection Email From Address</b><br>(e.g. no-reply@myredcap.com or help@myredcap.com)",
+            "required": false,
+            "type": "email",
+            "branchingLogic": {
+                "field": "rejection-email-notification",
+                "value": "1"
+            }
+        },
+        {
+            "key": "allowlist-logging-option",
+            "name": "<b>API Allowlist Logging Options</b><br>You can log all api attempts through one of these options:<br><ol><li>No Logging</li><li>Database Table: A new table will be added to your schema that records each api call, the user, the project, ip, and duration.  This is a great way to identify who is using your API and how much 'cpu-time' they are spending.  This is the recommended option.</li></ol><i>Note: If you install the emLogger EM, you will automatically get logging to file as configured in your emLogger.  You can clear/rotate the log file anytime you like</i>",
+            "required": false,
+            "type": "radio",
+            "choices": [
+                {
+                    "name": "0. No Logging",
+                    "value": "0"
+                },
+                {
+                    "name": "1. Custom Table <small><sup>*</sup>Recommended</small>",
+                    "value": "1"
+                }
+            ],
+            "branchingLogic": {
+                "field": "first-time-setup",
+                "value": "0"
+            }
+        },
+        {
+            "key": "fix-redcap-event-name-error",
+            "name": "<b>Fix redcap_event_name issue</b> <i>(optional)</i><br>API queries used to allow you to ask for the redcap_event_name as a field but now this throws an exception.  If you check this box, the API allowlist will remove the redcap_event_name field request from incoming API record queries preventing the .",
+            "required": false,
+            "type": "checkbox"
+        },
+        {
+            "key": "activate-allowlist",
+            "name": "<b>Turn On Allowlist Filtering</b><br>Once your server is configured and your rules are in-place, you must check this box to activate the module and begin filtering inbound requests",
+            "required": false,
+            "type": "checkbox"
+        },
+        {
+            "key": "enable-system-debug-logging",
+            "name": "<b>Enable Debug Logging</b>  <i>(optional)</i><br>If you have the Stanford emLogger external module installed and configured, you can enable additional debug-level logging through this checkbox</b>",
+            "required": false,
+            "type": "checkbox"
+        }
+    ],
+    "project-settings": [
+    ],
+    "compatibility": {
+        "php-version-min": "",
+        "php-version-max": "",
+        "redcap-version-min": "11.1.1",
+        "redcap-version-max": ""
     }
-
-  ],
-
-  "project-settings": [
-  ]
 }

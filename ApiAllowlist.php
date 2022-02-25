@@ -2,7 +2,9 @@
 namespace Stanford\ApiAllowlist;
 
 include_once "emLoggerTrait.php";
+
 include_once "createProjectFromXML.php";
+
 use \REDCap;
 use \Exception;
 use \Logging;
@@ -17,7 +19,6 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     public $username;          // request username
     public $project_id;        // request project_id
 
-    public $required_allowlist_fields = array('rule_id', 'username', 'project_id', 'ip_address', 'inactive');
     public $config_valid;      // configuration valid
     public $config_errors;     // array of configuration errors
     public $logging_option;    // configured log option
@@ -31,9 +32,10 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     public $comment;           // Text comment
     public $log_id;            // log_id if last inserted db log
 
+    # Internal Module Constants
     const LOG_TABLE                      = 'redcap_log_api_allowlist';
     const RULES_SURVEY_FORM_NAME         = 'api_allowlist_request';
-    const REQUIRED_ALLOWLIST_FIELDS      = array('rule_id', 'username', 'project_id', 'ip_address', 'enabled');
+    const REQUIRED_ALLOWLIST_FIELDS      = array('rule_id', 'expiration_date', 'allowlist_type', 'username', 'project_id', 'ip_address', 'enabled');
     const KEY_LOGGING_OPTION             = 'allowlist-logging-option';
     const KEY_REJECTION_MESSAGE          = 'rejection-message';
     const KEY_VALID_CONFIGURATION        = 'configuration-valid';
@@ -43,7 +45,8 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     const KEY_REJECTION_EMAIL_NOTIFY     = 'rejection-email-notification';
     const DEFAULT_REJECTION_MESSAGE      = 'Your API request has been rejected because your user, project, or network address have not been approved for API access.  To request API approval please complete the following survey or contact your REDCap support team.  INSERT_SURVEY_URL_HERE';
     const DEFAULT_EMAIL_REJECTION_HEADER = 'One or more API requests were made to REDCap using tokens associated with your account. Below is a summary of the rejected requests. In order to use the API you must request approval for your application. Please contact HOMEPAGE_CONTACT_EMAIL or complete the following survey: INSERT_SURVEY_URL_HERE';
-    const MIN_EMAIL_RESEND_DURATION      = 15; //minutes interval to prevent default notifications from repeating rejections
+    const MIN_EMAIL_RESEND_DURATION      = 60; //minutes interval to prevent default notifications from repeating rejections
+    const HOURS_TO_NOTIFY_REJECTIONS     = 24; //only try and notify users for rejections less than 24 hours old
     const EXPIRED_RULE_EMAIL             = 'An API Allowlist rule associated with your account has expired and has been marked inactive.  If you are no longer are using the REDCap API for this project/network/user you can ignore this message.  If you are still using this API, you will receive rejection notification emails when requests are blocked.  For assistance with this message, please contact your REDCap support team.';
 
 
@@ -81,321 +84,20 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
      * @return null
      */
     function redcap_module_link_check_display($project_id, $link) {
-        if ($this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
+        $is_valid = $this->getSystemSetting(self::KEY_VALID_CONFIGURATION);
+        if ($is_valid == 1) {
             // Do nothing - show default info link
-            if($this->getSystemSetting(self::KEY_ALLOWLIST_ACTIVE) == 0) {
-                $link['icon'] = "cross_small_gray";
-                $link['name'] = "API Allowlist - Inactive";
+            $is_active = $this->getSystemSetting(self::KEY_ALLOWLIST_ACTIVE);
+            if($is_active == 0) {
+                $link['icon'] = "fas fa-times-circle";
+                $link['name'] = "API Allowlist - <span class='badge bg-secondary text-light'>Inactive</span>";
             }
         } else {
-            $link['icon'] = "exclamation";
-            $link['name'] = "API Allowlist - Setup Incomplete";
+            // configuration is not valid
+            $link['icon'] = "fas fa-times-circle";
+            $link['name'] = "API Allowlist - <span class='badge bg-danger text-light'>Setup Incomplete</span>";
         }
         return $link;
-    }
-
-
-    /**
-     * Try to automatically configure the EM by creating a new project
-     * @throws Exception
-     */
-    function checkFirstTimeSetup(){
-        if($this->getSystemSetting('first-time-setup')){
-            $this->emDebug("Setting up First Time Setup");
-
-            global $homepage_contact_email;
-
-            $newProjectID = $this->createAPIAllowListRulesProject();
-            if ($newProjectID > 0) {
-                $url = $this->getRulesPublicSurveyUrl($newProjectID);
-                $this->emDebug("Got survey hash of $url");
-
-                $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
-                $rejectionMessage = str_replace('INSERT_SURVEY_URL_HERE', $url, $rejectionMessage);
-                $this->setSystemSetting('rejection-message', $rejectionMessage);
-
-                $emailHeader = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email, self::DEFAULT_EMAIL_REJECTION_HEADER);
-                $emailHeader = str_replace('INSERT_SURVEY_URL_HERE', $url, $emailHeader);
-                $this->setSystemSetting('rejection-email-header', $emailHeader);
-                $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, true);
-                $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
-
-                $this->setSystemSetting('first-time-setup', false);
-                $this->setSystemSetting('allowlist-logging-option','1');
-            }
-        }
-    }
-
-    /**
-     * Called Every 15 minutes via cron, determines whether or not to email user with Rejection notices
-     * Runs assuming MIN_EMAIL_RESEND_DURATION, is 15m
-     *
-     */
-    function cronRejectionNotifications(){
-        $this->checkNotifications();
-    }
-
-
-    /**
-     * Get the public survey url for the current PID
-     * @param $pid
-     * @return string
-     * @throws Exception
-     */
-    function getRulesPublicSurveyUrl($pid) {
-
-        // Get the survey and event ids in the project
-        $proj = new \Project($pid);
-        $event_id = $proj->firstEventId;
-        $survey_id = $proj->firstFormSurveyId;
-        $this->emDebug($survey_id, $event_id);
-
-        // See if there is a hash yet
-		$sql = "select hash from redcap_surveys_participants where survey_id = $survey_id and event_id = $event_id and participant_email is null";
-		$q = db_query($sql);
-
-		// Hash exists
-		if (db_num_rows($q) > 0) {
-    		// Hash exists
-			$hash = db_result($q, 0);
-		} else {
-    		// Create hash
-			$hash = \Survey::setHash($survey_id, null, $event_id, null, true);
-		}
-
-        return APP_PATH_SURVEY_FULL . "?s=$hash";
-    }
-
-
-    /**
-     * Fetch all users from within the external modules log that have been sent a email notification within
-     *  the MIN_EMAIL_RESEND_DURATION threshold
-     * @return array : array of users that have already been notified
-     */
-    function getRecentlyNotifiedUsers() {
-        $sql = "select user, max(timestamp) as ts where message = 'NOTIFICATION' group by user";
-        $q = $this->queryLogs($sql);
-        $usersRecentlyNotified = array();
-        while($row = db_fetch_assoc($q)) {
-            $user = $row['user'];
-            $ts = $row['ts'];
-            $diff = round((strtotime("NOW") - strtotime($ts)) / 60,2);
-            if($diff < self::MIN_EMAIL_RESEND_DURATION){
-                //dont notify these users, already notified
-                array_push($usersRecentlyNotified, $user);
-            }
-        }
-        $this->emDebug('Users not to Notify', $usersRecentlyNotified);
-        return $usersRecentlyNotified;
-    }
-
-
-    /**
-     * Fetch all rejection notifications since last email and group by user
-     * @param null $userFilter
-     * @return 2d array, each rejection row indexed by user
-     */
-    function getRejections($userFilter = null) {
-        $sql = "select log_id, timestamp, ip, project_id, user where message = 'REJECT'";
-        $q = $this->queryLogs($sql);
-        $payload = array();
-
-        while($row = db_fetch_assoc($q)){
-            $user = $row['user'];
-            if(in_array($user,$userFilter)){
-                //if in the recently notified users list, skip
-                continue;
-            } else {
-                //sum all query information, notify user
-                if(!array_key_exists($user, $payload)){
-                    //create user in payload array
-                    $this->emDebug($user, $payload);
-                    $payload[$user] = array();
-                }
-                array_push($payload[$user], $row);
-            }
-        }
-        return $payload;
-    }
-
-
-    /**
-     * Get an email address for a username
-     * @param $user
-     * @return bool
-     */
-    function getUserEmail($user) {
-        $sql = "SELECT user_email from redcap_user_information where username = '" . db_real_escape_string($user) . "'";
-        $q = $this->query($sql);
-        return db_result($q,0);
-    }
-
-
-    /**
-     * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
-     * @throws Exception
-     * @return void
-     */
-    function checkNotifications() {
-        $filter = $this->getRecentlyNotifiedUsers();
-        //fetch users that have already been notified within the threshold period
-
-        $rejections = ($this->getRejections($filter));
-        //fetch all rejection messages, grouped by user
-        $this->emDebug($rejections);
-        if(!empty($rejections)) {
-            $header = $this->getSystemSetting('rejection-email-header');
-            $rejectionEmailFrom = $this->getSystemSetting('rejection-email-from-address');
-            if(!empty($rejectionEmailFrom)) {
-                foreach($rejections as $user => $rows){
-                    $logIds = array();
-                    $email = $this->getUserEmail($user);
-
-                    //fetch the first col in the returned row
-                    $table = "<table>
-                                <thead><tr>
-                                    <th>Time</th>
-                                    <th>IP Address</th>
-                                    <th>Project ID</th>
-                                </tr></thead>
-                              <tbody>";
-
-                    foreach ($rows as $row) {
-                        $table .= "<tr><td>{$row['timestamp']}</td><td>{$row['ip']}</td><td>{$row['project_id']}</td></tr>";
-                        array_push($logIds, $row['log_id']);
-                        //keep track of logID to remove from table upon fin
-                    }
-                    $table .= "</tbody></table>";
-                    $messageBody = $header . "<hr>" . $table;
-                    $this->emDebug($email, $rejectionEmailFrom, $messageBody);
-                    $emailResult = REDCap::email($email,$rejectionEmailFrom,'API Allowlist rejection notice', $messageBody);
-
-                    $this->emDebug("Result:", $emailResult);
-                    if($emailResult){
-                        $this->logNotification($user);
-                        $this->emDebug('deleting log_ids', $logIds);
-
-                        $sql = 'log_id in ('. implode(',', $logIds) . ') and (project_id is null or project_id > 0)';
-                        $this->removeLogs($sql, []);
-                    } else {
-                        $this->emError('Email not sent', $messageBody , $rejectionEmailFrom, $email);
-                    }
-                }
-            }
-        }
-    }
-
-
-    /**
-     * Create a NOTIFICATION entry in the log table : indicates when last email was sent
-     * @param $user , username
-     * @return void
-     */
-    function logNotification($user){
-        $this->log("NOTIFICATION", array(
-            'user' => $user
-        ));
-    }
-
-
-    /**
-     * Create a REJECT entry in the log table
-     * @throws Exception
-     */
-    function logRejection() {
-        // Are we logging rejections for email?
-        $emailRejection = $this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY);
-        if (empty($emailRejection)) {
-            // No need to do anything
-            return;
-        }
-
-        // Log the rejection
-        $this->log("REJECT", array(
-            'user' => $this->username,
-            'ip'    => $this->ip,
-            'project_id' => $this->project_id)
-        );
-    }
-
-
-    /**
-     * Determine if the module is configured properly
-     * store this as two parameters in the em-settings table*
-     * @param $quick_check  / true for a quick check of whether or not the config is valid
-     * @return bool
-     * @throws Exception
-     */
-    function validateSetup($quick_check = false) {
-        // Quick Check
-        if ($quick_check) {
-            // Let's just look at the KEY_VALID_CONFIGURATION setting
-            if (!$this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
-                $this->emDebug('EM Configuration is not valid - skipping API filter');
-                return false;
-            }
-        }
-        // Do a thorough check
-        // Verify that the module is set up correctly
-        $config_errors = array();
-
-        // Make sure rejection message is set
-        if (empty($this->getSystemSetting(self::KEY_REJECTION_MESSAGE))) $config_errors[] = "Missing rejection message in module setup";
-
-        // Make sure configuration project is set
-        $this->config_pid = $this->getSystemSetting(self::KEY_CONFIG_PID);
-        if (empty($this->config_pid)) {
-            $config_errors[] = "Missing API Allowlist Configuration project_id setting in module setup";
-        } else {
-            // Verify that the project has the right fields
-            $q = REDCap::getDataDictionary($this->config_pid, 'json');
-            $dictionary = json_decode($q,true);
-            //$this->emDebug($dictionary);
-
-            // Look for missing required fields from the data dictionary
-            $fields = array();
-            foreach ($dictionary as $field) $fields[] = $field['field_name'];
-
-            $missing = array_diff(self::REQUIRED_ALLOWLIST_FIELDS, $fields);
-            if (!empty($missing)) $config_errors[] = "The API Allowlist project (#$this->config_pid) is missing required fields: " . implode(", ", $missing);
-        }
-
-        // Check for custom log table
-        if ($this->getSystemSetting(self::KEY_LOGGING_OPTION) == 1) {
-            // Make sure we have the custom log table
-            if(! $this->tableExists(self::LOG_TABLE)) {
-                // Table missing - try to create the table
-                $this->emDebug("Trying to create custom logging table in database: " . self::LOG_TABLE);
-                if (! $this->createLogTable()) {
-                    $this->emDebug("Not able to create log table from script - perhaps db user doesn't have permissions");
-                    $config_errors[] = "Error creating log table automatically - check the control center API Allowlist link for instructions";
-                } else {
-                    $this->emDebug("Custom logging table (". self::LOG_TABLE . ") created from script");
-
-                    // Sanity check to make sure table creation worked
-                    if(! $this->tableExists(self::LOG_TABLE)) {
-                        $this->emError("Log table creation reported true but I'm not able to verify - this shouldn't happen");
-                        $config_errors[] = "Missing required table after table creation reported success - this shouldn't happen.  Is " . self::LOG_TABLE . " there or not?";
-                    } else {
-                        // Table was created
-                        $this->emLog("Created database table " . self::LOG_TABLE . " auto-magically");
-                    }
-                }
-            } else {
-                // Custom table exists!
-                $this->emDebug("Custom log table verified");
-            }
-        }
-        // Save setup validation to database so we don't have to do this on each api call
-        $this->config_valid = empty($config_errors);
-        $this->config_errors = $config_errors;
-
-        $this->setSystemSetting(self::KEY_VALID_CONFIGURATION, $this->config_valid ? 1 : 0);
-        $this->setSystemSetting(self::KEY_VALID_CONFIGURATION_ERRORS, json_encode($this->config_errors));
-
-        if (!$this->config_valid) $this->emLog("Config Validation Errors", $this->config_errors);
-
-        return $this->config_valid;
     }
 
 
@@ -438,7 +140,7 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
                 break;
             case "REJECT":
                 $this->logRequest();
-                $this->logRejection();
+                // $this->logRejection();
                 $this->checkNotifications();
 
                 header('HTTP/1.0 403 Forbidden');
@@ -453,12 +155,370 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
 
 
     /**
+     * Try to automatically configure the EM
+     * @throws Exception
+     */
+    function checkFirstTimeSetup(){
+        if($this->getSystemSetting('first-time-setup')){
+            $this->emDebug("Setting up First Time Setup");
+
+            // Check if we already have a project_id
+            $config_project = $this->getSystemSetting(self::KEY_CONFIG_PID);
+            if (empty($config_project)) {
+                // Try to make the new rule project
+                $newProjectID = $this->createAPIAllowListRulesProject();
+            }
+
+            // Update project parameters
+            if ($newProjectID > 0) {
+                global $homepage_contact_email;
+                $url = $this->getRulesPublicSurveyUrl($newProjectID);
+                $this->emDebug("Got survey hash of $url");
+
+                $rejectionMessage = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email,self::DEFAULT_REJECTION_MESSAGE);
+                $rejectionMessage = str_replace('INSERT_SURVEY_URL_HERE', $url, $rejectionMessage);
+                $this->setSystemSetting('rejection-message', $rejectionMessage);
+
+                $emailHeader = str_replace('HOMEPAGE_CONTACT_EMAIL', $homepage_contact_email, self::DEFAULT_EMAIL_REJECTION_HEADER);
+                $emailHeader = str_replace('INSERT_SURVEY_URL_HERE', $url, $emailHeader);
+                $this->setSystemSetting('rejection-email-header', $emailHeader);
+                $this->setSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY, true);
+                $this->setSystemSetting('rejection-email-from-address', $homepage_contact_email);
+
+                $this->setSystemSetting('first-time-setup', false);
+                $this->setSystemSetting('allowlist-logging-option','1');
+            }
+
+            // Try to make database table
+            if (!$this->tableExists(self::LOG_TABLE)) {
+                $result = $this->createLogTable();
+                $this->emDebug("Creating " . self::LOG_TABLE . " with result: " . (int)$result);
+            }
+
+        }
+
+
+
+    }
+
+
+    /**
+     * Called Every 15 minutes via cron, determines whether or not to email user with Rejection notices
+     * Runs assuming MIN_EMAIL_RESEND_DURATION, is 15m
+     *
+     */
+    function cronRejectionNotifications(){
+        $this->checkNotifications();
+    }
+
+
+    /**
+     * Get the public survey url for the current PID
+     * @param $pid
+     * @return string
+     * @throws Exception
+     */
+    function getRulesPublicSurveyUrl($pid) {
+
+        // Get the survey and event ids in the project
+        $proj = new \Project($pid);
+        $event_id = $proj->firstEventId;
+        $survey_id = $proj->firstFormSurveyId;
+        $this->emDebug($survey_id, $event_id);
+
+        // See if there is a hash yet
+		$sql = "select hash from redcap_surveys_participants where survey_id = ? and event_id = ? and participant_email is null";
+		$q = $this->query($sql, [$survey_id, $event_id]);
+
+		// Hash exists
+		if ($row = $q->fetch_assoc()) {
+    		// Hash exists
+			$hash = $row['hash'];
+		} else {
+    		// Create hash
+			$hash = \Survey::setHash($survey_id, null, $event_id, null, true);
+		}
+
+        return APP_PATH_SURVEY_FULL . "?s=$hash";
+    }
+
+    /**
+     * Quick util to get home url for project
+     * @param $pid
+     * @return string
+     */
+    public function getProjectHomeUrl($pid) {
+        return substr(APP_PATH_WEBROOT_FULL,0,-1) .
+            APP_PATH_WEBROOT . 'index.php?pid=' . $pid;
+    }
+
+
+    /**
+     * Fetch all users from within the external modules log that have been sent an email notification within
+     *  the MIN_EMAIL_RESEND_DURATION threshold
+     * @return array array of users that have already been notified
+     */
+    function getRecentlyNotifiedUsers() {
+        $sql = "SELECT
+                lp.value as user,
+                max(l.timestamp) AS ts
+            FROM redcap_external_modules_log l
+            LEFT JOIN redcap_external_modules_log_parameters lp on lp.log_id = l.log_id and lp.name = 'user'
+            WHERE
+                l.message = 'NOTIFICATION'
+            AND l.timestamp >= ( NOW() - INTERVAL " . self::MIN_EMAIL_RESEND_DURATION . " MINUTE )
+            GROUP BY user";
+        $q = $this->query($sql, []);
+
+        $usersRecentlyNotified = [];
+        while($row = db_fetch_assoc($q)) {
+            $usersRecentlyNotified[] = $row['user'];
+        }
+        //$this->emDebug("Recently Notified: " . $sql, json_encode($usersRecentlyNotified));
+        return $usersRecentlyNotified;
+    }
+
+
+    /**
+     * Fetch all rejected API calls in the past 24 hours where owner hasn't been notified
+     * @param null $userFilter
+     * @return 2d array, each rejection row indexed by user
+     */
+    function getRejections($userFilter = null) {
+        $sql = "select
+                log_id,
+                username as user,
+                ts as timestamp,
+                ip_address as ip,
+                project_id
+            from redcap_log_api_allowlist
+            where
+                ts > NOW() - INTERVAL ? HOUR
+            AND notified = false
+            AND result = 'REJECT'";
+        $q = $this->query($sql, [self::HOURS_TO_NOTIFY_REJECTIONS]);
+
+        // $sql = "select log_id, timestamp, ip, project_id, user where message = 'REJECT'";
+        // $q = $this->queryLogs($sql, []);
+        $payload = array();
+        while($row = db_fetch_assoc($q)){
+            $user = $row['user'];
+            if(in_array($user,$userFilter)){
+                //if in the recently notified users list, skip
+                $this->emDebug("Not notifying $user as they were recently contacted");
+                continue;
+            } else {
+                //sum all query information, notify user
+                if(!array_key_exists($user, $payload)){
+                    //create user in payload array
+                    $payload[$user] = array();
+                }
+                array_push($payload[$user], $row);
+            }
+        }
+        return $payload;
+    }
+
+
+    /**
+     * Get an email address for a username
+     * @param $user
+     * @return bool
+     */
+    function getUserEmail($user) {
+        $sql = "SELECT user_email from redcap_user_information where username = ?";
+        $q = $this->query($sql, [$user]);
+        return db_result($q,0);
+    }
+
+
+    /**
+     * Determines whether or not to send a user an email notification based on MIN_EMAIL_RESEND_DURATION
+     * @throws Exception
+     * @return void
+     */
+    function checkNotifications() {
+        // fetch users that have already been notified within the threshold period
+        $filter = $this->getRecentlyNotifiedUsers();
+
+        // fetch all rejection messages in the recent day, grouped by user
+        $rejections = ($this->getRejections($filter));
+        //$this->emDebug($rejections);
+
+        if(!empty($rejections)) {
+            $header = $this->getSystemSetting('rejection-email-header');
+            $rejectionEmailFrom = $this->getSystemSetting('rejection-email-from-address');
+            if(!empty($rejectionEmailFrom)) {
+                foreach($rejections as $user => $rows){
+                    $logIds = array();
+                    $email = $this->getUserEmail($user);
+
+                    //fetch the first col in the returned row
+                    $css = "style='text-align:left; padding-right: 15px;' ";
+                    $table = "<table>
+                                <thead><tr>
+                                    <th $css>Time</th>
+                                    <th $css>IP Address</th>
+                                    <th $css>Project ID</th>
+                                </tr></thead>
+                              <tbody>";
+
+                    foreach ($rows as $row) {
+                        $project = "<a href='{$this->getProjectHomeUrl($row['project_id'])}' target='_blank'>{$row['project_id']}</a>";
+                        $table .= "<tr><td $css>{$row['timestamp']}</td><td $css>{$row['ip']}</td><td $css>$project</td></tr>";
+
+                        //keep track of logID to remove from table upon fin
+                        $logIds[] = $row['log_id'];
+                    }
+                    $table .= "</tbody></table>";
+                    $messageBody = $header . "<hr>" . $table;
+                    $this->emDebug($email, $rejectionEmailFrom, $messageBody);
+                    $emailResult = REDCap::email($email,$rejectionEmailFrom,'API Allowlist rejection notice', $messageBody);
+                    $this->emDebug("Result:", $emailResult);
+                    if($emailResult){
+                        $this->logNotification($user);
+                        $this->emDebug('deleting log_ids', $logIds);
+                        $sql = "update " . self::LOG_TABLE . " set notified = true where log_id in (" .
+                            implode(',', $logIds) . ")";
+                        $result = $this->query($sql,[]);
+                        $this->emDebug("Marking " . count($logIds) . " rejected calls for $user as notified - " . json_encode($result));
+                    } else {
+                        $this->emError('Email not sent', $messageBody , $rejectionEmailFrom, $email);
+                    }
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Create a NOTIFICATION entry in the log table : indicates when last email was sent to user
+     * @param $user username
+     * @return void
+     */
+    function logNotification($user){
+        $this->log("NOTIFICATION", array(
+            'user' => $user
+        ));
+    }
+
+    // /**
+    //  * Create a REJECT entry in the log table
+    //  * @throws Exception
+    //  */
+    // function logRejection() {
+    //     // Are we logging rejections for email?
+    //     $emailRejection = $this->getSystemSetting(self::KEY_REJECTION_EMAIL_NOTIFY);
+    //     if (empty($emailRejection)) {
+    //         // No need to do anything
+    //         return;
+    //     }
+    //
+    //     // Log the rejection
+    //     $this->log("REJECT", array(
+    //             'user' => $this->username,
+    //             'ui_id' => $this->username,
+    //         'ip'    => $this->ip,
+    //         'project_id' => $this->project_id)
+    //     );
+    // }
+
+
+    /**
+     * Determine if the module is configured properly
+     * store this as two parameters in the em-settings table
+     * @param $quick_check  / true for a quick check of whether or not the config is valid
+     * @return bool
+     * @throws Exception
+     */
+    function validateSetup($quick_check = false) {
+        # Quick Check
+        if ($quick_check) {
+            // Let's just look at the KEY_VALID_CONFIGURATION setting
+            if (!$this->getSystemSetting(self::KEY_VALID_CONFIGURATION) == 1) {
+                $this->emDebug('EM Configuration is not valid');
+                return false;
+            }
+        }
+
+        # Do a Thorough Check
+        // Verify that the module is set up correctly
+        $config_errors = array();
+
+        // Make sure rejection message is set
+        if (empty($this->getSystemSetting(self::KEY_REJECTION_MESSAGE))) {
+            $config_errors[] = "Missing rejection message in module setup";
+        }
+
+        // Make sure configuration project is set
+        $this->config_pid = $this->getSystemSetting(self::KEY_CONFIG_PID);
+        if (empty($this->config_pid)) {
+            $config_errors[] = "Missing API Allowlist Configuration project_id setting in module setup";
+        } else {
+            // Verify that the project has the right fields
+            $q = REDCap::getDataDictionary($this->config_pid, 'json');
+            $dictionary = json_decode($q,true);
+
+            // Parse out fields from dictionary
+            $fields = array();
+            foreach ($dictionary as $field) $fields[] = $field['field_name'];
+
+            // Check for required fields
+            $missing = array_diff(self::REQUIRED_ALLOWLIST_FIELDS, $fields);
+            if (!empty($missing)) $config_errors[] = "The API Allowlist project (#$this->config_pid) is missing required fields: " . implode(", ", $missing);
+        }
+
+        // Check for presence of custom log table if configured
+        if ($this->getSystemSetting(self::KEY_LOGGING_OPTION) == 1) {
+            // Make sure we have the custom log table
+            if(! $this->tableExists(self::LOG_TABLE)) {
+                // Table missing - try to create the table
+                $config_errors[] = "Table-based logging is enabled but the required table `" . self::LOG_TABLE . "` has not been created.";
+            } else {
+                // Custom table exists!
+                // $this->emDebug("Custom log table verified");
+            }
+        }
+
+        // Save validation results to system settings to support 'quick' checks
+        $this->config_valid = empty($config_errors);
+        $this->config_errors = $config_errors;
+
+        $this->setSystemSetting(self::KEY_VALID_CONFIGURATION, $this->config_valid ? 1 : 0);
+        $this->setSystemSetting(self::KEY_VALID_CONFIGURATION_ERRORS, json_encode($this->config_errors));
+
+        if (!$this->config_valid) $this->emLog("Config Validation Errors", $this->config_errors);
+
+        return $this->config_valid;
+    }
+
+
+    // public function foo() {
+    //     $this->emDebug("Trying to create custom logging table in database: " . self::LOG_TABLE);
+    //     if (! $this->createLogTable()) {
+    //         $this->emDebug("Not able to create log table from script - perhaps db user doesn't have permissions");
+    //         $config_errors[] = "Error creating log table automatically - check the control center API Allowlist link for instructions";
+    //     } else {
+    //         // Sanity check to make sure table creation worked
+    //         if(! $this->tableExists(self::LOG_TABLE)) {
+    //             $this->emError("Log table creation reported true but I'm not able to verify - this shouldn't happen");
+    //             $config_errors[] = "Missing required table after table creation reported success - this shouldn't happen.  Is " . self::LOG_TABLE . " there or not?";
+    //         } else {
+    //             // Table was created
+    //             $this->emLog("Created database table " . self::LOG_TABLE . " auto-magically");
+    //         }
+    //     }
+    //
+    // }
+
+
+    /**
      * Function that dynamically creates and assigns a API Allowlist Redcap project using a supertoken
      * @return boolean success
      * @throws Exception
      */
     public function createAPIallowListRulesProject(){
-        $odmFile = $this->getModulePath() . 'assets/APIAllowlistRulesProject.xml';
+        $odmFile = $this->getModulePath() . 'assets/APIAllowlistRulesProject.REDCap.xml';
         $this->emDebug("ODM FILE",$odmFile);
         $newProjectHelper = new createProjectFromXML($this);
         $superToken = $newProjectHelper->getSuperToken(USERID);
@@ -478,12 +538,12 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
         $this->setSystemSetting(self::KEY_CONFIG_PID, $newProjectID);
 
         // Fix dynamic SQL fields
-        $newProjectHelper->convertDyanicSQLField(
+        $newProjectHelper->convertDynamicSQLField(
             $newProjectID,
             'project_id',
             'select project_id, CONCAT_WS(" ",CONCAT("[", project_id, "]"), app_title) from redcap_projects;'
         );
-        $newProjectHelper->convertDyanicSQLField(
+        $newProjectHelper->convertDynamicSQLField(
             $newProjectID,
             'username',
             'select username, CONCAT_WS(" ", CONCAT("[",username,"]"),user_firstname, user_lastname) from redcap_user_information order by username;'
@@ -574,8 +634,11 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
                     // Inactivate the rule
                     $rule['enabled___1'] = 0;
                     $result = REDCap::saveData($this->config_pid, 'json', json_encode(array($rule)));
-                    $this->emDebug("Inactivated expired rule " . $this->rule_id, $result);
-
+                    if (empty($result['errors'])) {
+                        $this->emDebug("Inactivated expired rule " . $this->rule_id);
+                    } else {
+                        $this->emError("Errors deactivating expired rule!", $result, $rule);
+                    }
                     continue;
                 }
 
@@ -633,25 +696,6 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
             $this->comment = "SCREEN REQUEST: " . $e->getMessage();
             return "ERROR";
         }
-    }
-
-
-    /**
-     * Check if current user IP is valid under any of the specified rules
-     * Param: String CIDR values
-     * @return bool T/F
-     */
-    function validIP($cidrs) {
-        // $this->emDebug('CIDRS', $cidrs);
-        $ips = preg_split("/[\n,]/", $cidrs);
-        // $this->emDebug($ips);
-
-        //check if any of the ips are valid
-        foreach($ips as $ip){
-            if($this->ipCIDRCheck(trim($ip)))
-                return true;
-        }
-        return false;
     }
 
 
@@ -722,14 +766,14 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
                 break;
         }
         // Log to EmLogger
-        $this->emDebug(array(
-            "result"     => $this->result,
-            "content"    => $content,
-            "ip"         => $this->ip,
-            "username"   => $this->username,
-            "project_id" => $this->project_id,
-            "rule_id"    => $this->rule_id,
-            "comment"    => $this->comment));
+        // $this->emDebug(array(
+        //     "result"     => $this->result,
+        //     "content"    => $content,
+        //     "ip"         => $this->ip,
+        //     "username"   => $this->username,
+        //     "project_id" => $this->project_id,
+        //     "rule_id"    => $this->rule_id,
+        //     "comment"    => $this->comment));
     }
 
 
@@ -738,7 +782,7 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
      */
     function logToDatabase() {
         $comment = empty($this->comment) ? json_encode($_REQUEST) : $this->comment;
-        $sql = sprintf("INSERT INTO %s SET 
+        $sql = sprintf("INSERT INTO %s SET
             ip_address = '%s',
             username = '%s',
             project_id = %d,
@@ -750,15 +794,15 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
             db_real_escape_string($this->username),
             db_real_escape_string($this->project_id),
             db_real_escape_string($this->result),
-            db_real_escape_string($this->rule_id),
+            db_real_escape_string(empty($this->rule_id) ? "NULL" : $this->rule_id),
             db_real_escape_string($comment)
         );
-        db_query($sql);
+        $result = db_query($sql);
         $this->log_id = db_insert_id();
+        $this->emDebug("Log Result: " . json_encode($result) . " - log id: " . json_encode($this->log_id));
 
         // Register a shutdown function to record the duration of the API call to the log database
         register_shutdown_function(array($this, "logToDatabaseUpdateDuration"));
-        $this->emDebug($sql, $this->log_id);
     }
 
 
@@ -769,9 +813,12 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     public function logToDatabaseUpdateDuration() {
         $duration = round((microtime(true) - $this->ts_start) * 1000, 3);
         $sql = sprintf("UPDATE %s SET duration = %u where log_id = %d LIMIT 1",
-            self::LOG_TABLE, $duration, $this->log_id);
-        $q = db_query($sql);
-        $this->emDebug($this->log_id, $this->ts_start, $sql, $q);
+            self::LOG_TABLE,
+            $duration,
+            $this->log_id
+        );
+        $q = $this->query($sql, []);
+        // $this->emDebug($this->log_id, $this->ts_start, $sql, $q);
     }
 
 
@@ -786,12 +833,14 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
         return !($q === FALSE);
     }
 
+
     /**
      * Create the custom log table
      * @return bool
      */
     public function createLogTable() {
-        $q = db_query($this->createLogTableSql());
+        $sql = $this->createLogTableSql();
+        $q = $this->query($sql, []);
         return !($q === FALSE);
     }
 
@@ -803,31 +852,38 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     public function createLogTableSql() {
         $sql="
             CREATE TABLE `" . self::LOG_TABLE . "` (
-              `log_id` int(10) NOT NULL AUTO_INCREMENT,
-              `ip_address` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `username` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `project_id` int(10) DEFAULT NULL,
-              `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-              `duration` float DEFAULT NULL,
-              `result` enum('PASS','REJECT','ERROR') CHARACTER SET utf8 DEFAULT NULL,
-              `rule_id` int(10) DEFAULT NULL,
-              `comment` text CHARACTER SET utf8,
-              PRIMARY KEY (`log_id`),
-              INDEX (`username`),
-              INDEX (`project_id`)
-            ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        ";
+               `log_id` int NOT NULL AUTO_INCREMENT,
+               `ip_address` varchar(50) DEFAULT NULL,
+               `username` varchar(255) DEFAULT NULL,
+               `project_id` int DEFAULT NULL,
+               `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+               `duration` float DEFAULT NULL,
+               `result` enum('PASS','REJECT','ERROR') DEFAULT NULL,
+               `rule_id` int DEFAULT NULL,
+               `comment` text,
+               `notified` bit DEFAULT b'0',
+               PRIMARY KEY (`log_id`),
+               INDEX (`username`),
+               INDEX (`project_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
         return $sql;
     }
 
 
     /**
-     * Load all of the configuration rules
+     * Load enabled allowlist rules
      * @param $pid
      */
     function loadRules($pid) {
         $filter = "[enabled(1)] = '1'";
-        $q = REDCap::getData($pid, 'json', NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
+        $params = [
+            'return_format' => 'json',
+            'filterLogic'  => "[enabled(1)] = '1'",
+            'project_id'    => $pid,
+            'fields'        => self::REQUIRED_ALLOWLIST_FIELDS
+        ];
+        $q = REDCap::getData($params);
+        // $q = REDCap::getData($pid, 'json', NULL, NULL, NULL, NULL, FALSE, FALSE, FALSE, $filter);
         $this->rules = json_decode($q,true);
     }
 
@@ -866,17 +922,17 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
      * @return array [username, project_id]
      * @throws Exception
      */
-    public function getUserProjectFromToken($token){
+    public function getUserProjectFromToken($token)
+    {
         $sql = "
-            SELECT username, project_id 
+            SELECT username, project_id
             FROM redcap_user_rights
-            WHERE api_token = '" . db_escape($token) . "'";
-        $q = db_query($sql);
-        if (db_num_rows($q) != 1) {
-            throw new Exception ("Returned invalid number of rows (" . db_num_rows($q) . ") in " . __METHOD__ . " from token '$token'");
-        } else {
-            $row = db_fetch_assoc($q);
+            WHERE api_token = ?";
+        $q = $this->query($sql, $token);
+        if ($row = $q->fetch_assoc()) {
             return array($row['username'], $row['project_id']);
+        } else {
+            throw new Exception ("Returned invalid number of rows (" . db_num_rows($q) . ") in " . __METHOD__ . " from token '$token'");
         }
     }
 
@@ -890,24 +946,100 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     }
 
 
+    // /**
+    //  * Checks if the IP is valid given an IP or CIDR range
+    //  * e.g. 192.168.123.1 = 192.168.123.1/30
+    //  * @param $CIDR
+    //  * @return bool
+    //  */
+    // public function ipCIDRCheck ($CIDR) {
+    //     $IP = $this->ip;
+    //     if(strpos($CIDR, "/") === false) $CIDR .= "/32";
+    //     list ($net, $mask) = explode ('/', $CIDR);
+    //     $ip_net = ip2long ($net);
+    //     $ip_mask = ~((1 << (32 - $mask)) - 1);
+    //     $ip_ip = ip2long ($IP);
+    //
+    //     $this->emDebug($net, $ip_net, $mask, $ip_mask, ($ip_ip & $ip_mask), ($ip_net & $ip_mask));
+    //
+    //     return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
+    // }
+
+
     /**
-     * Checks if the IP is valid given an IP or CIDR range
-     * e.g. 192.168.123.1 = 192.168.123.1/30
-     * @param $CIDR
-     * @return bool
+     * Taken from https://stackoverflow.com/questions/4931721/getting-list-ips-from-cidr-notation-in-php
+     * @param $ipv4
+     * @param $format
+     * @return array|int|int[]|string
      */
-    public function ipCIDRCheck ($CIDR) {
-        $IP = $this->ip;
-        if(strpos($CIDR, "/") === false) $CIDR .= "/32";
-        list ($net, $mask) = explode ('/', $CIDR);
-        $ip_net = ip2long ($net);
-        $ip_mask = ~((1 << (32 - $mask)) - 1);
-        $ip_ip = ip2long ($IP);
+    public function cidr2range($ipv4, $format="decimal")
+    {
+        if ($ip = strpos($ipv4, '/')) {
+            $n_ip = (1 << (32 - substr($ipv4, 1 + $ip))) - 1;
+            $ip_dec = ip2long(substr($ipv4, 0, $ip));
+        } else {
+            $n_ip = 0;
+            $ip_dec = ip2long($ipv4);
+        }
+        $ip_min = $ip_dec & ~$n_ip;
+        $ip_max = $ip_min + $n_ip;
 
-        // $this->emDebug(($ip_ip & $ip_mask), ($ip_net & $ip_mask));
-
-        return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
+        switch($format) {
+            case "decimal":
+                #Array(2) of Decimal Values Range
+                return [$ip_min, $ip_max];
+            case "human":
+                #Array(2) of Ipv4 Human Readable Range
+                return [long2ip($ip_min),long2ip($ip_max)];
+            case "subnet":
+                #Array(2) of Ipv4 and Subnet Range
+                return [long2ip($ip_min),long2ip(~$n_ip)];
+            case "wildcard":
+                #Array(2) of Ipv4 and Wildcard Bits
+                return [long2ip($ip_min),long2ip($n_ip)];
+            case "integer":
+                #Integer Number of Ipv4 in Range
+                return ++$n_ip;
+            default:
+                return "Invalid format!";
+        }
     }
 
+    /**
+     * Intended to be a function to call to check -- CIDR can also be a plain IP
+     * @param $ip
+     * @param $cidr
+     * @return bool
+     */
+    public function ipInCidr($ip, $cidr) {
+        if(
+            ($range=$this->cidr2range($cidr)) &&
+            ($check=ip2long($ip))!==false &&
+            $check>=$range[0] && $check<=$range[1]
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+     * Check if current user IP is valid under any of the specified rules
+     * Param: String CIDR values
+     * @return bool T/F
+     */
+    function validIP($cidr_list): bool
+    {
+        $cidrs = preg_split("/[\s,]+/", $cidr_list);
+        // $this->emDebug($ips);
+
+        //check if any of the ips are valid
+        foreach($cidrs as $cidr){
+            // if($this->ipCIDRCheck(trim($cidr)))
+            if ($this->ipInCidr($this->ip, $cidr)) return true;
+        }
+        return false;
+    }
 
 }

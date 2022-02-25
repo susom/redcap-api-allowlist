@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:redcap="https://projectredcap.org" xsi:schemaLocation="http://www.cdisc.org/ns/odm/v1.3 schema/odm/ODM1-3-1.xsd" ODMVersion="1.3.1" FileOID="000-00-0000" FileType="Snapshot" Description="API Allowlist EM Rules" AsOfDateTime="2022-02-14T11:57:10" CreationDateTime="2022-02-14T11:57:10" SourceSystem="REDCap" SourceSystemVersion="12.0.4">
+<Study OID="Project.APIAllowlistEMRules">
+<GlobalVariables>
+	<StudyName>API Allowlist EM Rules</StudyName>
+	<StudyDescription>This file contains the metadata, events, and data for REDCap project "API Allowlist EM Rules".</StudyDescription>
+	<ProtocolName>API Allowlist EM Rules</ProtocolName>
+	<redcap:RecordAutonumberingEnabled>1</redcap:RecordAutonumberingEnabled>
+	<redcap:CustomRecordLabel>[user_id], [request_pid]</redcap:CustomRecordLabel>
+	<redcap:SecondaryUniqueField></redcap:SecondaryUniqueField>
+	<redcap:SchedulingEnabled>0</redcap:SchedulingEnabled>
+	<redcap:SurveysEnabled>1</redcap:SurveysEnabled>
+	<redcap:SurveyInvitationEmailField></redcap:SurveyInvitationEmailField>
+	<redcap:Purpose>4</redcap:Purpose>
+	<redcap:PurposeOther></redcap:PurposeOther>
+	<redcap:ProjectNotes></redcap:ProjectNotes>
+	<redcap:MissingDataCodes></redcap:MissingDataCodes>
+	<redcap:ProtectedEmailMode>0</redcap:ProtectedEmailMode>
+	<redcap:ProtectedEmailModeCustomText></redcap:ProtectedEmailModeCustomText>
+	<redcap:ProtectedEmailModeTrigger>ALL</redcap:ProtectedEmailModeTrigger>
+	<redcap:ProtectedEmailModeLogo></redcap:ProtectedEmailModeLogo>
+	<redcap:OdmAttachmentGroup>
+		<redcap:OdmAttachment MimeType="image/png" DocName="web-logo-color-filled-shield.png" ID="5e81086741b4df24e637737f4d2ef285cc00eed8"><![CDATA[iVBORw0KGgoAAAANSUhEUgAAAcUAAABaCAYAAADJhk2mAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAOxAAADsQBlSsOGwAAIABJREFUeNrtnQvcTVXex1d4a2IykXKJSVGNylBEKiIlvCpCJCGiN+VWUiojo9LILSrThSLknlt4kYjchiYRoYuimG5KTaU307u+q7Oe9tnP2ufsc3uu/9/ncz4e57b2WXvv9Vu///WYXzSUQCAQCAQCVUSmQCAQCAQCIUWBQCAQCIQUBQKBQCAQUhQIBAKBQEhRIBAIBAIhRYFAIBAIhBQFAoFAIBBSFAgEAoFASFEgEAgEAiFFgUAgEAiEFAUCgUAgSCeKyRQI8hu+ePddtXflSvPv4X37zHPHlSypSp95pjrtsstUxXr1VJFihevS/vrDD9UXu3apva++qurdfbcqccopSX3P8OHD1bfffquGDh0qF5pASNGPD5YvV/96662MDV5c37jla9VS7y9ZkrEx/qtECVW7Z0850wUAn23frlYOHKg+2bjR/QZ9HW0aO1aVrFRJNRwyRJ3ZokWBm4OfjxxR/9C/8cjhw+rbTz9VX+3ZYwiR5y3q9O6d9PcfPHhQffPNN3KxCYQUXVihd5zceJnCqXXrqtJVq6p1jz2W0R/5xwYN1CnnnSdnOx9jz6JFalGPHuo/P/+c9dzxpUurkn/8ozr88cfqh6++ynoe9biga1fVQ2/oTqhQoUDNw//9+99GIX+wbFkUEQoEggyTIrvysISIGsNcw441L+JDrXgzSYrM1cevv561e//3Z5+Z560Ji4XZLuAlK1YUgk4QWCv8hNhk9GhV/cYbo0hzSa9ehjQA1oGCRoh2I3D1hAnqiFZzq7Ua3jZlilwgAkFOkOLe114L/SVNRo1SFWrXVs/WqpUnf+RHmrDq9uuX1u9kgf7HuHFq66RJCavpuyKkKQiHZXfeGUWIVZs1iyJEgKm06HHHqZf182w66j/wQIGek+P+8AczBy5S/H358nLRCATpJsVAv40Dvxw9GrVo5TUc2LzZHF+6gi/w48zv0sX8m8xiJgiPfW+8YZS4F0E+szOuvFLV6NxZXaBVZWEItAkKpilsQUYCQY6QIkQS98N6Z162Zk116MMPzS69zJ/+pP6jCTIZssgk8L18rhdWjjVV4K+a2apVlonUzsMFt95qFAwLFTv17w4cUN98/LE6vH+/evPpp7MWdqIkBeHx/tKlockAXJFh/7RAICiEpMjC7w1ciEU27MrPaNJEHf3xRxNJOrFu3bypFt98My2kSFCQlxCJdGw9fbpJB/CC53mAc9u1Uztnz1aLJQo2Yex3WCzwqwkEAkEm4EzeJ7otDKo2barWa5J4R5MCSggFVbNbt7QcGME7fpRPwWeZDvUKGUJuXlw8YEA2QnShWps26tz27UOPtXH0aLVp3LhCf4G6grdc14ZAIBBkTCmGjSLFNHjTypXqq/feM//vuGyZ2vLMMykdEKYxAndQnwBf4AfLV6h3X56rqujnKl9+uXp70qQotRYGYYk+Ft7Uv83vO63WunXoz5+uj52k8zAEjiKFSAs7jkjOnEAgyG2lGEZVQV5EXS7t3Vsdq3fuf6hUSW3Q6gbiwLeYLPAJQYiYZgnFJ8S+0sX1VAv9vQf1/0lcJtw+0Yod6UgX8RMrZrxEghrK1qhhSD0WIF3mNC8HLgkhCgSCQkWKYQiEBev6efNMAv6exYuN+fTnH39U3TdvTinCEtLAnzmpQQM1rXlztfmp8VnmsuodO5pAni927jSBPYn4ltJRhOA733dwnDYvLgxOPP101VSTeiysHzFCHdiyRa5MrrHDh2USBAJBjsIpc8KYJlFyVLz576efzkqSxre2dtiwhNI5/PhFKyTI1RLzhtGj1DszpqtyF1ygKl1yiSGVY4oWNUTJ/5do1Ri2sgcBRDb4JRm4SHjfunUmFSAd2DZ1qtowalTaTzKqExP3D19+mXWekq2N6f9el1Jmo8A1xOtskNIxVroVKMfHg2PLi8foP15bGILjZM5TuY4FAkGCpBhmh47qIfJ0ye23q7NbtlTlatQwZj9MmyapWC/wyQDTLVGiEA21V63K44GZFhKqdPHFZiEjwIfjCOsvZBFMZTFhLAoBePHaAw+Y40k1+GPzU0+p1Q8+GPUcm4ulMepYMs+nBkT7slHA90pxATYYfnMsxEjgD+eQlJKwsGXG8I3umD1bXaw3Rvg+sRQwHufMr8pZyDGJ1+nVy8xhWNjz74drTmIpcOOXXrFC7V6wQL23ZIlT3bOxoxwgkcJstsICawHz+6+tW9Wnmzebeemp54cx3p03z7gAUP7f6A3ZCeXLm4LlFJKIZ+Xgt7/78stqv77eg6wcicylQJAIXnrpJfMADz/8sKpevXrhJsUwpkYWAt53vb5xIRt2rzfqG5nnUZDJ4p8TJqim48YZ3+KLEVOqX+29M2OG+fuP9esnZKpFgaYCV3k2fu8UveC3mTUrqbJikMkbjz5qalm6vjuWKZvF20WKkCnpH7aDRNDmY83QoWqnPu42mtyClNKqQYOyTOMci/988NxsTYr+zYJ/M0LlFTYx+IZjFeqGwMhNRDH7k/Yt+J6wpAghcT0GfZf3mud7eTCvVwwf7owq5n3Tr746a/Po8nsyJvPvP3e8lw3Fdj1Gh8WLnd9PsQI752HuwbyEr7/+Wn3//feBr5cpU0Yde+yxwjj5AHRK+TTCAz/99FNGx/ryyy/VEb2JL6Y55BTfOsTYX3zxRdLffcIJJ5hHyqQYBiyib0+ebBaGWlptoJRQh29pUjupWrWku2vsnDPHJMJDQCx0VI5xBZ0wHiRkCTIMSKhPBedoZeXPU7QEM0krgEYPPWSURligrJansIFwgXmfo48TpWKLK7BhYTF3LaIs0gu7dVPtFy4MVCOuqjIWiRRz5zxSw/TqiRNNOk/QOaKYdzpA0Bfq23v9MBcUWeD64hri97+nCcpL9vxe/NnXvvBCNtWItYKNSJDiBJBmvECp4086KdtzbI5c5nPG4zz8Tm8ACTbjmPNiENLjjz+uFgZcR1nX04knqnPOOUe10BujJpEIc0Hhxn333ae26I1kBb2eL1iwIOq1bdu2qVs1HySLHnq94ZEjpMhNyULKTbpb/1tGEyHPoRbnJpCP51o4/7d3b/PdmNzwWb6iJ8W/yGA6hFQS+u6jR1OT1Zpk6utd/NJevZzzwfMoPlRumCAggopQ2kb9aHL3KyBer+MYy8KvNAzp6Lk6qnddlEK7qF+/KLMuhLn49tuzRRejLN/T6sxFVDU1QfHgsyz2fv8tv/NPrVqpqppETjr77Kyo5EPvv6+26HPnV8Ac48p771VnXHGF0x9JOzE7J99//rkhUT/s6zE3V1r9vuarf8p8tdKK1W92vGzwYGOSfc/Twozz+XLHjqrTypVR78cy0fypp8w8vK4JF8uG6xomp5ZNG/eHX7FfqFWk//qAvDGh+89/42HDnGZSNiko4PwWlIWaXLdunXnMmzdPjRgxQhUvXlyYQZBnEJcUWVRL6ZuSmxB/XFZTV704vKoXN8xh1oTJQsCNjSLhObubZXGgvBlFmllowpgUWQyv1aR3VsRU9Ypjt5AbrXNQggSs+P1/FmwQMCWGUY3eqjf4jlxqPBH/FmZH5v5KTcp/7tw52+uoRsx2E7Ty8JtBP169OlC92c+Wr13bqCgvztcqs55P7XK+jY+ufn21Rs/DJp9pE9Kk4LwrQImNh/3NQebfeHPC5/wKHBJyEaKX6J7X3+t1HaAE5+t5JBfXT+Ac53l6Y+YixW56k+Edh+PBnMrmg3Nay1fZaJcmBz8hombphhGU8oPS5d7Lq0X4n3vuuWymsAMHDqitW7caMsQ0t2nTJnX//fer0aNHy0oscOKss85ST+vNtQsjR45Uu3fvNn8Hvad8EsXxi8R7AyabG/Vun5vwAs+unYAaqrm8OnCg2WGzGGP2oj8iO3lrWmIxIrDgTE1uB/UNERYEGtiACoixlacbAAtLmDJ0mYL57THMnlY1sgHIZD9KP6poUms1daqTEL0EcL6j6lCYYKVkgpQu0Rsn1+fey2BjaRSi37R50Z13xgxMYfPnqptqeheuWBF4bzhNhL5xbClAFHXjRx+NCmziWmFz6T9HtMbKz4W9IUTMYd5HLU3gXfUaMV3PBSZUsGbNGvVWBhuZC/I38Ady3bgeXl9h0HsqJBHnEZcUWdTxrzTQygjFaBe4N4YNM+qPHTbRlxAVO1dMPrbVD0n8PH9agwaGHNcnWKzZawLje8lTZMFg0bFVdHILqKPWM2bEDK7BdEiw0HuOotaZAItomPQQVw1Yipdn6pis2o9ScxkaD1XmJ1wIL4yvl7lzqdDNTz6Z8iaBY8AV4A8yemvixGwbvPPaty/Q9V0xl3r9POvXr5fVPw+jsAVHhdqKnlCunFGKRBASfk9DXXwZKCF8Xvj+jvvd78xihBnI+jkaPvSQMT9xg0OokFmiEXNvRsrGYY4k4ADzHwE9/hqkuYHKjRoZ0xq+nd0BAQYsePM7dTLHf0GCDt9M4b9y2IfjirL8JkZkbCpwpQJx3YSNUmbz5TcRcz2jPDNRc/VtRz/EWNG5BQVnnHFG1t+fxcmLPnr0qFq9erVaQVrN7t0mIpGAnXr16qnrr79eneQIWvKC6MaZM2eaYA47VsWKFdXFejN/7bXXxo1OjDX+DTfcYP6OB6Jyly9fbpTx3r17zXcULVrUmAf5DbXimMEXLVpkTM516tRRNfWmls+/8MIL6tVXX1U//PCDqlKlSqAZmt8/f/58tXnzZrV///4sJV+/fn3Vtm3buD5dO7/79D1LmgbzyJjHH3+8mcPOeo0PMwcFhhRRQkSTLu/f3+z4iZpjgThZkyTtmFjwCMKgq7xRITVqmH+JIkQpXjNhgjGrErV3bJKLipcYGQ/fZF4gRWA7odP5nTkKMutaxRtEjDnlH+XcfbppU47OkSvdI1Nl7PyEBiok4Hcrf8EFzmP9RM8Zm6B0goAnl980Hd1cCgogAvyORCH6n9+xY4chO8igZsCcYZrt16+fSTHwfx6f5gR97w4YMEA1a9YscPx7773XjOUaf86cOSZYKGh8xrU5f/5jsEQDsfXs2dOYloNAVO+WiNiASHv37h1ldg7ynTHuuHHjsqVVcPx8fsaMGepvf/tb3DzEKXrz9pQWPP7vef/99w3R40MuKMQYlxQxn26M7EB+PHTI5OMRlIF/ZJm+2Ag0aDBokNlFo5a26506eW+oJ/wlLCj/evvtlEPICURBiWLiwiSH39Lf1zAeMtngl919Rb1riqUaCc5hYXUpp0QLnCcCziGkjTmX4gc5XVc1p5SpudYc/im7YQtFirVrO5/PxPlxBVexCU2kmEJ+xR5PBHSlADM0CueWW24x6g5VdbXelDds2NAolJ07dxpCZHGHICZPnqwqV66c7fOWEFFDd9xxh1FUgM9DaJASqido/Jtvvtn8y/gtW7Y06so1Pn5Sl/9q7ty56pnIpp7XSUOxx2lJFSUK4Vx44YVxyYljYZMAoaH2rrjiCnNsrjkcP368IX1rAm3evLn5ft6P4iXgibklACrWuA8RLKc3ECjGxo0bq6pVqxq1C1Ezt/w9ceJEdeeddxYe86mR21oZ1r7tNlP0m0UGUyjNdAmbhxhRhQTHHKMJixubQAGiDvHR1OjUSW3WJyjZxZioVqLxMN/+U+9IWuobAGIhOnVWmzah648el2ASZ7KqERMeaQd+9cfvXz1kSFTQUKaAYiWqkaooqZTdy0/AOuFS3ImUcIOQePi/JxM+0EMOV0LxPFxuLl3AlOiNFoQMghZjFm0WdNSO18TI36g7SBNie+KJJ4xi8wIFZtXZg3pDermnGD+fx2y5TG8UWwSYqxkfEoo1PqQJMY4aNSrb+ADzKkoKQuX9EJIF42J+7Nu3r/n/LC044pEiv4m0FjYIAwcODPT3oSotIUJmkK7dEFi0b99erV27Nm6+KITIZuCvf/1rlKn5uuuuUx06dDDqcfHixQWbFL2pFxakSdh0CkyA7Mhr3367iTYl6AVCuHL4cJMLSG1SAjdIxE8kuT4IEO5HWp1+rC8uc8L1DVXr1lsNWRLoMz9GtKUXf0hAMaQCciiZF5tE7wVqDdWcKdUKGRIEBTG7NiH41zi/ecX8nE4EVSwqmmCgAMR0OEM+T/+58uPYAtwrEjLcsGGDIUTMboDF1kUEKKE1kfsd06LL58Zi36tXL2P+5L2QhdeEh4KxuPTSS7PPtb4ugggx7PgQWtD4dgxMi0HguIjERTXa8WKBMZivBx54IIpg/SBdwWLo0KHZCNEqVzYG8cB77rrrrmzjoXhR7mwsOC42J5UKQE3eYkHkEbQosOtGgeDn42/C/yEtbma6VxCUsHvRIpPwTZ4a+WipAmJt9uSTWaTILh7CwUyLgiRFwp/n5VSKJUvm2MRCPvhAMTH7wSaifAbyyyA6UmT8pmrOUw19nqh1CiHidyuIpJguuGr/5uf0iNwACq6YZ84o4/VlpCC9V21RV9MFAkssqaBIgnDRRReZfzFBkgN52WWXZb1WtmzZrL+XLFligmrCgsCUVMcPCwgLUkTVuojVDxRiLELENGrz95hjgnNSASbToPEwpS6LFOhA1RdYUowVau71rfA3aRYoR8yrpGLgW0QdbUxjQi6KB38iJlOCE1igMAkSvEKiOpVbUEax/JYcVyZ9ikGKEbL2V5DJBCmyGXH1YSQnkXSawuCnCooOxcSfECk6rqOc6kqRk3mtmUSsiFIUBuqjdevWgYutDSJBFcWKjuQ1FA8mzH2+jTwqkAhNyAa1xHd27NjRqZr8sIE9BNDEGx/fHr93X0jrAubGXbt2Gb8qn/EGzKCmY5EiYxFoEwtbPFWOILRM4pQCaO53K8UEFwBUo82rSqS/YCKgCwGRrRDM0YiZjKAekuhRQuSh2ShVF1zBLTkBcjj9pJiJupUE+PgJ8VK9o6zrUKouFAQlhC+b3+GfhzBNsy2CoodPSqFxdhBc9xkpS5lK/8hJYFb0Lu4Em0BcKK+xY8fGTaq2pk/+jVf70haM9hcjx7xJZKoNtiEwhAdECyHjSwvyydnxMfPGGx915xo/arOjx0et4hOEcJMtsl0sxH3qNRuH2QAIQpBixUsuUbVyoMFrIlGBLBa0qPKqVRY/2xMvXoeKMikuaigxzGqJhuW71Gky3TRigUXfVbC7ZgKFtdN9TLkFNk7+eqCJBBp94khXgaBcHVJSRdBGLZ09OnMLBLV4iQ/yofAzZEBQzCOPPBLqezC5+s2ugfeawxqC0ps9e7aaNGlSVrQkpMSD4BkIL5Z5NNXxAabYMWPGZAX9oK7q1q2rqlWrZlQfaROQZbrgJdxkypwJKTpQSu8uKO6caSQaafeLTwFQSMAuVgfjlIpKlRTpk4eJtkeCJalcKqVkxYrZnkslwOLzd97JbtbQ85LT5uK8AKKd/aT4qf5/UENkP/Y78hzP0ddZJkAKjwv0wMzvpOgHqowUBkyF+KAwn9YMkY+J+Y88ulSAYiQykpQMoi3JzcPECNlBzihYXgs67rAE7gKEZ4NeCKhhHL+Pz/ov0wWv+sWsW6GAbHhzlRSL64to5cCBGU8oJxjlEl/dx1g4JrKoUTjgcn1D1YhEnRLRuSfimE90V54I8PcQgBTWv8RC7FdwKLKTHarDVdYrrNnPdZ6OyUPm0P+LYVZKN/Dj+guQY46kzVk85cw87pg1K9vzQbVkg/x/YaOLbQlEfy9KrmfSmwoaMUJMnTp1Mn8PHz5cvfjii4E+RfyOmAFtlGq6yAIFy4M0g0GDBhli5Dggaa9/zI5vA1aSAWZV1Ki5LqtXN1G3OVEyzRvs8sEHH4TafAh+g7P2KTvqvFxV48zmzU0ACcdJu6VFjtZS2Qg4xQgs6+Oh60NYkJvpj+KtGTnubKToKFWFHzVM4XOX6ZNqQ4kEbYSpferyF4dpx+X6DWF8z8kkzJM/W9VRnWTtsGFx5wOftP9YidgNMp3+EvDbjyTgegjy+VJQPtm2UHk1WAelRAI5gGxiKSS7kENMXh9ZuoBaI80AEDnqL0qejvGJRrWmzJtuuinHaojWiFQVA6tWrRKWSwcpgnJ5iBQhJBoO/9nTdgof45x27UzEZbwFNh2mREtaJMNPadIk5oIFQVPomXxBv1o9P0CtkL7i+p4wRdQpTeaPLuWz8/R8+dUmxclpZusH5G1zSoPq07r8lmEW4B8cPhnIJ95GJqjoezyyvFzPu195o95WDBgQOCbKzH++UHKXBbQIM/PhMFuDHxMIpMLce66j/yjzQ/9KqiC50qOY960B/URzs4NMPGA+tORAQrmr9Bnw5g/SvDgZQHZHY2zavEEo/sAX7/hUhklqc+L5bbEIMazPMrS1RKtSWzWHvpVb8lnPzdxGoI0N0+aWgB5VOYkSkaazXvPn+8uWqVWDBoWukJNIT8IwoHDBNK1G8FNyXKgTSJeoWFoNkQfoX5hQc7QPCooq5HsoRo3v0guqBbEAUnSdggBH9c2L/3TnrFmmog9j8510EPH39oPE6BHIsZGj+b0mk1gmcdQJaS78jlv0jeStBANRusiS443nr3t33jw3Ea1YEbOHo79BscWBN9+M+TnmmspCFJvwbphs1xLaSBFNCnHym2yBee/1ZK+7WN0qgo6PgvmJBObQSJjNi3+jxfGQ0sOD4/m9/l34ntkUcNxB1z/Njy8ZODAjubCpAhNlly5dTDQq5sVnn33WWQkFpUZiOEqHpHbMra4EckCx7gv0xtBf2JuKLphJBw8e7MyfW+LppuItUG7Hp7AAYxMEE298qvL4UzcqemIH+B5/AQF+P1Vz1jnK/aUKCg5QVAAQ4ES1HX+RBMiY8W+77ba4aR5CiurXDhCucldedA+5A1mlL8p4Pj+njNULLe12LCESRcgxhVEZURdnmknRAgIM04eQOrEu9eJHo6FD1UxNZH4lRI6mvx2STcS3oEg6ASWu2p+oJJsGAoE21Ivmh5rMXD0NeV/TceOiCNGoy4BgA46VDQq5qv4+ghASauZfAcFJfCeLfMV69aJIlQUfpR3Uc3GxvonpXs8cEKzlysFkI9R+4UJT7cirtDhfi+J0K+GzTUaNCuy/yPFBVDsd/kezAOqFhvfg38TCQDnEWJsGzklbTcpYPYLq5jLP/uuC43QVQMdHyYNNGwUuSuSxXDJI0dbdJOiF6E9/3VJA1RZrviRIhxZTlEqzgSMEyEBY+B1pReVtR8VrkCJKsU2bNuqqq64yJlOiMb/77jvzOUqTWVOq7e/oBWRKEYJkxreKzeZQUuMUEoJobe1RGw2LYk2n79RYS/Tmj9JyzLOtIcvYJPMTJUuxAFsGj+ObkYbKYwWeFLlRUYv+IAAvWJQhqm2eWp4sApicCHZg98sCm2xkJcRsVR6L64HNmxOOWDWd3PWimyo4FirUMB8cRzwTFUR+ur4w6c4eNvKVz6BOCHIKmne+i/J6/v6AnK92+rPrHnvMWcgAQmYu6QPJd9D0GfOk17yKwqLRrjfAA1KJ1xAYhcrD2x6LTRDkE2vzAkHNat3aHFvPyOYizOcgW37nuohpmc2ZK/gJtXaz3oW/ra8drB7xSrdxvRO8VS1GtCkkRCH6WODYuV6teTPo+PznD3VLBagNmpBjpZGgAOv06WPU8kjP/QCJk/tIqtMJkVD8vFi0AVMi5dkIdIG0qBs61hccZX7PiSeaEmmoGRQjie7POHKRiS71R1jyf8yztjs7BGhJ0AtIgsR+F+z4Q4YMMUovkfEB5Ee9UAqGk8PIb/D6+Pgcka0QNTVU0w02FRwXAT7Ms398s67pzQgVcgQhSBHQKioWKdpds7e+KTc/pMjNzQLSNBJ9lQwsIWJWgihcfre4ZKaJKR2pCey2WfDtos+u/Tu9wzqid1rWr8Y4JU4+2SxOyTaJhRjZ3TOv5MxRiJrvNUXY9QUci2BZWC+LmM5QZxTIBuTu+VUPx9d59WoTzGMjanmfX9GgcCG7WIs6v5+gE28ZPc5VN72wM06QydgoWF9QCmkKfI7vinXeIEa7Mfl9jFwsSMGeN34nZMPcMm5R/RrnlUcFrRbC5GpCtJBcuo7PtfniwWcxw3KdMU/MIcfnP07OzcnnnmtiAHI74R9zp82Li9ejEMWFUjwSsUQFlTfjOUx/5BWuXLnSKBy6OvA85knG5OHy2UF406ZNMyZUyAByZExMuLZup6smqn98CgAwPv0QqUQTdnxrhiVP0vZzRJlhyqUXI0qOz/GcVZlB80YBcH+3+TCgHRX+UcrmEUxkCyjY3x9Uwo2x7DHFynXE7BrmfbGQ7G+zn8tRUjw9REg4xOn12R0ToyZforCBHRABiyz+tERV55/i7OpTIclMmqVOjDRlTuqk6sUe1RPGPI3qiOV7CkMUrvcYP2aczYjrPZBomA0FBJAoCUDsqZZrC/O7kj0+/zzYYhWxkFcaVwPqfiZS+7NzyEL+1hQZr4NEEDCPplr/M5XxIeGgPEhLhD3inMcWKTSeZvyuCRTysKQYhnAgxVT9kcn+thYZasZdJN5iV9nTbsUFdrSE87NzJuruQBojnTDbEcjB4tJaq1FUS1lPuHGYhalKQPNQgUAgEAgSIkXgTYNwYfv06cbHgqrDXGrrj2LSsQoSP6PdpSdiysQERTeMVyO9CVGMmGPP08+FSWwmX60wFMIWCAQCQXoQt+xJlaZNjWIMk49Gj8NakeK5jTxJ7vi5bL4XwRFhcu+8IBKR3ow0KybIBHJtNXWqSdx/bdCgwALbJPgLBAKBQJA2UsTvRGj5uhBE5o9EBSg7nuO1VIJuID7y3ehWjlIsU62aCcnH9/KyQ82iUvNinpZAIBAI8i6KhHkTtR/DmCFtJKr3YcnynTTlwRBoc3DrVjWjZUsT+l6+dm3n+y5yJAQLBAKBQJCSUgREWdbp3dupFmv16GGUG/mDhIVXylCivBflatQw+WSo2LW+0lyAsPlk0jcEAoFAIEoxFAj99gfJ2LJg64YPN/l0+B35m39//vFH83faDlTt8eOnAAANuUlEQVQT4EWR4smYTlGMEOLbjvqP9SLljQQCgUAgSLtSBBAipLTaUyDZaxK1RY15DrVIOsTh/fvNc2Fy5uKh9m23mfqemGipfUp9R1cJOlrxxKqLKSg4+P7f36uvDn2ljv581CRSFy1WVCZFIBDkDCkC2h5RziteuSyACZOSZQAyqx4ntSMeIFtMuFRroXizixDxe16RYGRronjrn/9UfXv1zvr/lU2aqPv/MiihzzRt3kzde999ocdcumSJevTh8I1Op8+apcqVLxfqvS9MfF4/JmZ7/lRNMiVKFFe1al+o6l5UV9U8//yU5q3hpb+Zs8eMG5v091EB5aWp09T8eS+rbW9vy3oeQiRxvEvXruriBE34nBvOUTrOzd9GPKbn66K47+X8TA+onRpmDuMhlTkWCIQUw75Zkw4tnGaGqBJDugQFjr24K4n+eBaUu5rfpYspEH62Hp+iy/4CyZBmslVgElmU90cUMJgxY7rqf88AU2Q3CHNnz4n6zKGvDiWmiL7/Purz8fDz0fDF0g8fPuz8bvvcyld/7drBQv+AJv9qjsLJYeAd40iSzashrjt69lQHDxzM9hpqkWPlcX37dmroQw+HVo6ff/551vGlem4efeQR9fKCBWk5j7HmMMx1KhAIEkeRRD+AaTQo/w8TK68TmAM5UbTa+0gV+CkplkzNUX+NTsa70EfCOQFMeEtjFMxmsV6yZHG+uBggEcyQpUqXyvbaxg0bVLu2bWP+1kyC8Tt17BhFiGxEqv+5ujrr7OgyU4sWLkx714GwQL3OD2iVJRAICphStKBNEX49vxnVazIF6fAlWpCwz7hUzvkHzUk9xQQgSBRsblWvmTt7tro2oE7la6+tTFh9xMN7ez/MyO8oX668WrV2TZaC3L1rt3rh+Ylq6eIlWRuAAf37q9NOOy1pxZgMmD9MnIxvcUuP7qp3n76qeIniWcf7zPi/q2effUaNGjMmG1HmJEaPGKmaNmsW03qQKqZOfynQTCsQCHKYFAmiaa6JCTOqbfFDT70wJdyok5oMIGDGc/V4hCzTScBhgV8I5bJBqxj+dfnxFi34tT8eCiwV01lOo2TJkqr2hbXN45VFi9Sdffsa1QsxYSKc5CvSkEk89cQTxsRpMXzkCHVd69bZjhczdueuN6uTTz45V+bstMqnqY/2fmTO85TJk1W37t1lhREI8hmKJPtBSMgb1GJrn8Z7hAnSiQU/IdL7rnbPnrkyeZdccqlRA5DFK4uyN4eFQJZHurPn5139f7doobp3/62K/xtr38gx8yQKcNrUqVn/Zx79hOhFbhEiaNasuSFn8OS4J8yxCwSCQkKKgPJvttZpbgBz7ZUZjjaNSdBHf1YNIq1y5syene31pUuXmIAHiLNuvfxt6kKBebFm9es5Mu6mjRujgkZu73VHnp0jrocukRY9EOK4MY/LCiMQFCZSBA0GD47bXioTIJiHTuW52VgVk+m1rX71JeJ/27ljR9Tr8yP+1UaNL9dq8ue0jYt5zvVwRWWmCyiwKlWqZP1/27a3c2SON67fEPX/unXz7uYC32cXvXmwanHy5EnGnJoJfPHFF4HXAZYLgUCQHIql+gUEuVyjyWlKkybqqz17cowQCejJdPpFPKAGGukNAcEemEpJvbj/L+dkESa+RtCyVSu1450daRs3KF8Nv6UNlMkEymhitGbTTBKwFyTnW+Czy8sJ+vg9IUTU4tgxYww5jR450uQMpht97ugV+BrXANdCTmPu3LmGrC1onkvuaAVPE+pnIq3l/GjdurU66aSTol6nu/2ll14a9Xkvli1bplatWqW+/PJL0wC4Y8eO5jMCQa4qRYBa67B4cY4Eu1hCLH3mmbk+ed9qUsQ02uLqq83/SQWwu3RSF/ib9IZGjS4vEBdL2IIA6VbjWeOXK5+n58eaeVGLNq2Fa8IWBijoGKM3AjaY7IcffjCk1UpvCNevX2+e27dvnyE9NlYHDhyIehx//PHmeV7nszwgPD4/fvz4qHHI9+zZs6caqTcclSpVUldddZXasmWLuuWWW9RPP/0kq7ogd5WiBZGnradPN02B6YpR0AnRi+tat1Ezp88wSmHjxg2mogoVV4xKbNkq7eomKGgn00EmmTIFxjznkZSL/ATUYp++fdWDfxls/k+0LtVrSpUqlbYxSImxZtps92IupCZBaJBV9+7dDVFZ9O/fX7300kuqXr16as+ePerYY49Vj+j5KFo0+z2xe/duoy779OkTpQbvu+8+owRRjUePHlX9+vUz5DdjxowsZdiiRQtDony/QJAnSNEqxkwRY14lREDaAv42FgaUwamnVswqQdY2DUUL/CBHLTfwiSelJKeiPEuVKv2bajx4IN/cWDd0uFE9P3Gi2Uhs/sdmte6NN1Tx4ukjeKoL5aWIZktoXkIElStXVtu2/Xov8G/VqlWdhAh27typqlWrFvVckyZN1Lx589RCfV9BivPnzzfvmz17dpSpFDLkvV6SnjBhgnlvrVq1VOfOndWUKVPUwIEDzevDhw9XN9xwg1q7dq0hXsi2W7duxtwrKNwoku4vtMRIqkS6QJRphyVL8iQhZqnFyO8l0X3unF8jUV3VVvIr8J96cwVzKnnfOw4Ek+5CCJkC1oG777kn6/+kaJTJxXSRTAPy8QZiAYhmzZo1qmbNmub/u3btUufpezkIO3bsUGeffXa251GJ1pc9bdo04388RW+Sg7Bp0yZ18803G9KEBPkX0yrHCL7++ms1c+ZMdY8+P/x9xx13GPIeMGCA+tRTFEQgSjGtxEhyf4XatU1rqf+kEHlJ943Gw4blapRpGFDRZtTIEYY8nnvmWfNc6zRuDHIbVIvxoub5NXNkXIqRe8GGI78kxVPVBisCSpEydXu0miqogNBQiZAK/sCPPvpIvfjii+a1jpFmAJASPkdvjisEZxUearNDhw7ZNxhaWfLYu3eveQwePDjwOL799ltjbmXMHj1+za2tU6eOIUpLyNu3bzff9+CDD6qzzjori3gXL16stm7dGhjYIxBSTBk1u3ZVZWvUUAu7dYsqyxZKwhYrZsjwz50754uJJAgF0wsFqW1u4jUBpd/yG1Boz3s6aaDecsp0x1g8bLrL38ePN/MaZL5FSeJryytRqnTcaNPqOvP3i5MmF9iFBEIjkIaAFyJQUWdt9KawPQ3Iixc3r0FYN910U5TKs+ZS65M802EN4jWICqIFfkUatWmaO9eYUrv56jNzTFaFcqx8hyVEwGc4ZtStoHCjSKYHKF+rlrpp5UrT5zAsTtA3ANGs+YUQLa7zKENaSgUFQuQnrFi+XLVv2zYqgb5Pv745egx39r8rivTaapIhL9QP/LitrrlG9endK8/k6tG+iXZUYOOGDQVyEbGE9vTTT6sFCxaodu3aqTJlyqiuelNs/ag2yAYFR1CMfVgfZJBPEpKCaDHBQqoglm8Wc23Dhg2j/JaYSD/77LMsAnaZaflu3kdaiECUYsZxfOnSqs3s2WrzU0+pN7T6+zlGWxvMpY2GDg1VRzWvgZxFQvFZuFu3zZzp9J7+d8d8neAezHaJAtPv2DGPq0OHvjK/gVQCf73W/7ntNnXFlVfm+LxiirZVgzgmyI/fCOmgyiHE11evzmrtNbbKGNXvrrvyxHVx94B7TLm/dBL10+P/bvJig8DcZCLIK0glQlT45QBkh+kU8jkn4hO2QTZB0aGuIBswZ84cQ7h8p/X3YUK1Y/kB+WEu9QKTKONahclxoVi9WK43f/yGGjVqCCsIKeYcqFF61tVXq+V33632rlwZ9RpdMK4cMUJVbtQo304mi/MTmvg/+eQTVT8BZZwoXCXlvKCkXPKkOCbwt6HYcsuf98ijj0b9dsiPGqw8/MC0mpdM1xQd6NSpc5QJOlWwAYiHnCJFCM1rioR88NERKWpJMUyQDZ/xgqhQchEJiEHBoSQxcfK93rQN1CTEyesoRHya3teIXrVRr1Y1ev2GJP8/99xzJho1nRHCAiHFUID8iE7ds2iR2vPKK8Z3eLEmSXoh5lbrp3SioLXzwZ+HrzQ3u08AfIR0tW/Q8DI1dvQYZ0FyiJuye/jx8prpulffPobQC2KRcK8itGipNyUQGuQF0UCcxfS97q9o07hxY0OiqE0Ij9chMgJjIFII8brrfvXJovbu0up/0KBBhshI0YAAIT1ImUhTVKL9P9cDuYyQIHmSgCAbjgdTL+OwuWJMzLY2MEdQuHHMLxq5NThRqf5mwXkd3EQ2NaFY0WKhq7ywGNoFsUTxEs5GvkGghJy33Fk8lC5VOqvPYCLH5Qf9FdMVsLLfl+OYaoI5PsXt27ep/fv2mwT/cuXLm8pBxZNI9ud8Wp9pKueG3xRr4+AdJ5FrxzWH8ZDo77Agfw//2tChQxP6DORGPmDWvGjl9thjj6m2bdsawhwyZIjzsyT7Q1KPP/5b8XQUHaTGd7p8fFTIIaUCM2p5fd7xIRLFyucYd9SoUeqtt94y45KfiPmUsncQ5kSt1knyhwDJYwREv15//fWB+ZMCIUWBQCAokKDCDkRrk/gFAj+KyBQIBILCAky9sVI6BAIhRYFAUChgg2xiBfwIBMVkCgQCQWEAvkvyKMuWLSuTIRBSFAgEhRtEr0oJN0E8iPlUIBAIBAIhRYFAIBAIhBQFAoFAIBBSFAgEAoFASFEgEAgEAiFFgUAgEAiEFAUCgUAgSBj/D5wTVrIAqlzJAAAAAElFTkSuQmCC]]></redcap:OdmAttachment>
+	</redcap:OdmAttachmentGroup>
+	<redcap:SurveysGroup>
+		<redcap:Surveys form_name="api_allow_list_request" title="API Allow List Request" instructions="" offline_instructions="" acknowledgement="&lt;p&gt;Thank you for submitting your request.&lt;/p&gt;" stop_action_acknowledgement="" stop_action_delete_response="0" question_by_section="1" display_page_number="0" question_auto_numbering="0" survey_enabled="1" save_and_return="0" save_and_return_code_bypass="0" logo="5e81086741b4df24e637737f4d2ef285cc00eed8" hide_title="0" view_results="0" min_responses_view_results="10" check_diversity_view_results="0" end_survey_redirect_next_survey="0" webauth_required="0" end_survey_redirect_url="" survey_expiration="" promis_skip_question="0" survey_auth_enabled_single="0" edit_completed_response="0" hide_back_button="0" show_required_field_text="1" confirmation_email_subject="" confirmation_email_content="" confirmation_email_from="" confirmation_email_from_display="" confirmation_email_attach_pdf="0" confirmation_email_attachment="" text_to_speech="0" text_to_speech_language="en" theme="" text_size="" font_family="" theme_text_buttons="" theme_bg_page="" theme_text_title="" theme_bg_title="" theme_text_sectionheader="" theme_bg_sectionheader="" theme_text_question="" theme_bg_question="" enhanced_choices="1" repeat_survey_enabled="0" repeat_survey_btn_text="" repeat_survey_btn_location="BEFORE_SUBMIT" response_limit="" response_limit_include_partials="1" response_limit_custom_text="&lt;p&gt;Thank you for your interest; however, the survey is closed because the maximum number of responses has been reached.&lt;/p&gt;" survey_time_limit_days="" survey_time_limit_hours="" survey_time_limit_minutes="" email_participant_field="" end_of_survey_pdf_download="0" pdf_save_to_field="" pdf_save_to_event_id="" pdf_auto_archive="0" pdf_econsent_version="" pdf_econsent_type="" pdf_econsent_firstname_field="" pdf_econsent_firstname_event_id="" pdf_econsent_lastname_field="" pdf_econsent_lastname_event_id="" pdf_econsent_dob_field="" pdf_econsent_dob_event_id="" pdf_econsent_allow_edit="0" pdf_econsent_signature_field1="" pdf_econsent_signature_field2="" pdf_econsent_signature_field3="" pdf_econsent_signature_field4="" pdf_econsent_signature_field5=""/>
+	</redcap:SurveysGroup>
+	<redcap:UserRolesGroup>
+		<redcap:UserRoles role_name="Data Entry" unique_role_name="U-281M8DJA97" lock_record="0" lock_record_multiform="0" lock_record_customize="0" data_export_tool="0" data_import_tool="1" data_comparison_tool="0" data_logging="0" file_repository="1" double_data="0" user_rights="0" data_access_groups="0" graphical="1" reports="1" design="0" calendar="1" data_entry="[my_first_instrument,1]" api_export="0" api_import="0" mobile_app="0" mobile_app_download_data="0" record_create="1" record_rename="0" record_delete="0" dts="0" participants="1" data_quality_design="0" data_quality_execute="0" data_quality_resolution="1" random_setup="0" random_dashboard="0" random_perform="0" realtime_webservice_mapping="0" realtime_webservice_adjudicate="0" external_module_config="0"/>
+		<redcap:UserRoles role_name="Export w/o Identifiers" unique_role_name="U-569XD3FFC7" lock_record="0" lock_record_multiform="0" lock_record_customize="0" data_export_tool="3" data_import_tool="0" data_comparison_tool="0" data_logging="0" file_repository="1" double_data="0" user_rights="0" data_access_groups="0" graphical="1" reports="1" design="0" calendar="0" data_entry="[my_first_instrument,1]" api_export="1" api_import="0" mobile_app="0" mobile_app_download_data="0" record_create="0" record_rename="0" record_delete="0" dts="0" participants="1" data_quality_design="0" data_quality_execute="0" data_quality_resolution="1" random_setup="0" random_dashboard="0" random_perform="0" realtime_webservice_mapping="0" realtime_webservice_adjudicate="0" external_module_config="0"/>
+		<redcap:UserRoles role_name="Project Admins" unique_role_name="U-664TDWXK37" lock_record="2" lock_record_multiform="1" lock_record_customize="1" data_export_tool="1" data_import_tool="1" data_comparison_tool="1" data_logging="1" file_repository="1" double_data="0" user_rights="1" data_access_groups="1" graphical="1" reports="1" design="1" calendar="1" data_entry="[api_whitelist_request,3][api_whitelist_rules,1]" api_export="1" api_import="1" mobile_app="1" mobile_app_download_data="1" record_create="1" record_rename="1" record_delete="1" dts="0" participants="1" data_quality_design="1" data_quality_execute="1" data_quality_resolution="1" random_setup="1" random_dashboard="0" random_perform="1" realtime_webservice_mapping="0" realtime_webservice_adjudicate="0" external_module_config=""/>
+		<redcap:UserRoles role_name="Read Only" unique_role_name="U-851DC3J4EC" lock_record="0" lock_record_multiform="0" lock_record_customize="0" data_export_tool="0" data_import_tool="0" data_comparison_tool="0" data_logging="0" file_repository="1" double_data="0" user_rights="0" data_access_groups="0" graphical="1" reports="1" design="0" calendar="0" data_entry="[my_first_instrument,1]" api_export="0" api_import="0" mobile_app="0" mobile_app_download_data="0" record_create="0" record_rename="0" record_delete="0" dts="0" participants="1" data_quality_design="0" data_quality_execute="0" data_quality_resolution="1" random_setup="0" random_dashboard="0" random_perform="0" realtime_webservice_mapping="0" realtime_webservice_adjudicate="0" external_module_config="0"/>
+	</redcap:UserRolesGroup>
+	<redcap:ReportsGroup>
+		<redcap:Reports title="Enabled API Allowlist Rules" unique_report_name="R-914P3WDN8M" report_order="1" user_access="ALL" user_edit_access="ALL" description="" combine_checkbox_values="0" output_dags="0" output_survey_fields="0" output_missing_data_codes="0" remove_line_breaks_in_values="1" orderby_field1="rule_id" orderby_sort1="ASC" orderby_field2="" orderby_sort2="" orderby_field3="" orderby_sort3="" advanced_logic="([enabled(1)] = &quot;1&quot;)" filter_type="EVENT" dynamic_filter1="" dynamic_filter2="" dynamic_filter3="" hash="NKPKYJN9DRC8JJ3K" short_url="" is_public="0" report_display_include_repeating_fields="1" report_display_header="BOTH" report_display_data="BOTH" limiter_logic="([enabled(1)] = &quot;1&quot;)" redcap_reports_fields="rule_id,username,ip_address,project_id,expiration_date" redcap_reports_filter_dags="" redcap_reports_filter_events="" ID="2da03344b97ce39851ec1eb4ee26195c4d85ccf9"/>
+		<redcap:Reports title="Report for import, record 200" unique_report_name="R-458MLXKM4L" report_order="2" user_access="ALL" user_edit_access="ALL" description="" combine_checkbox_values="0" output_dags="0" output_survey_fields="0" output_missing_data_codes="0" remove_line_breaks_in_values="1" orderby_field1="rule_id" orderby_sort1="ASC" orderby_field2="" orderby_sort2="" orderby_field3="" orderby_sort3="" advanced_logic="([rule_id] = &quot;200&quot;)" filter_type="EVENT" dynamic_filter1="" dynamic_filter2="" dynamic_filter3="" hash="4YC8A7LTDMRDJEDR" short_url="" is_public="0" report_display_include_repeating_fields="1" report_display_header="BOTH" report_display_data="BOTH" limiter_logic="([rule_id] = &quot;200&quot;)" redcap_reports_fields="rule_id,name_first,name_last,department,title_affiliation,user_id,email,request_notes,request_pid,request_phi,request_reason,reason_other,request_vpn_exception,request_type,request_devices,request_token_users,request_token_security,request_expiration,request_ip_ranges,request_ip_server,request_ip_range_contact,api_token_attestation,request_signature" redcap_reports_filter_dags="" redcap_reports_filter_events="" ID="e6849cc2cc6f7952db2615f219afd902aafd15e8"/>
+		<redcap:Reports title="SQL fields" unique_report_name="R-834HKHXY4K" report_order="3" user_access="ALL" user_edit_access="ALL" description="" combine_checkbox_values="0" output_dags="0" output_survey_fields="0" output_missing_data_codes="0" remove_line_breaks_in_values="1" orderby_field1="rule_id" orderby_sort1="ASC" orderby_field2="" orderby_sort2="" orderby_field3="" orderby_sort3="" advanced_logic="" filter_type="EVENT" dynamic_filter1="" dynamic_filter2="" dynamic_filter3="" hash="E89KTARD48CYTMLX" short_url="" is_public="0" report_display_include_repeating_fields="1" report_display_header="BOTH" report_display_data="BOTH" limiter_logic="" redcap_reports_fields="rule_id,username,project_id" redcap_reports_filter_dags="" redcap_reports_filter_events="" ID="0b821b1d63dfea06a0b1df3fccd2bb278a8a0b7e"/>
+	</redcap:ReportsGroup>
+	<redcap:AlertsGroup>
+		<redcap:Alerts alert_title="" alert_type="EMAIL" alert_stop_type="RECORD" email_deleted="0" alert_expiration="" form_name="api_allow_list_request" form_name_event="event_1_arm_1" alert_condition="" ensure_logic_still_true="0" prevent_piping_identifiers="0" email_incomplete="0" email_from="no-reply@stanford.edu" email_from_display="" email_to="redcap-help@lists.stanford.edu" phone_number_to="" email_cc="" email_bcc="" email_subject="API Exemption Request Completed" alert_message="&lt;p&gt;A new API Allowlist request has been received, you can view the response below:&lt;/p&gt;
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+&lt;p&gt;[redcap-version-url]DataEntry/record_home.php?pid=17897&amp;id=[record-name]&amp;arm=1&lt;/p&gt;" email_failed="" email_attachment_variable="" email_attachment1="" email_attachment2="" email_attachment3="" email_attachment4="" email_attachment5="" email_repetitive="0" email_repetitive_change="0" email_repetitive_change_calcs="0" cron_send_email_on="now" cron_send_email_on_date="" cron_send_email_on_time_lag_days="" cron_send_email_on_time_lag_hours="" cron_send_email_on_time_lag_minutes="" cron_send_email_on_field="" cron_send_email_on_field_after="after" cron_send_email_on_next_day_type="DAY" cron_send_email_on_next_time="" cron_repeat_for="0" cron_repeat_for_units="DAYS" cron_repeat_for_max="" email_timestamp_sent="2022-02-14 09:55:54" email_sent="1" alert_order="1" alert_number="1"/>
+	</redcap:AlertsGroup>
+</GlobalVariables>
+<MetaDataVersion OID="Metadata.APIAllowlistEMRules_2022-02-14_1157" Name="API Allowlist EM Rules" redcap:RecordIdField="rule_id">
+	<FormDef OID="Form.api_allow_list_request" Name="API Allow List Request" Repeating="No" redcap:FormName="api_allow_list_request">
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.rule_id" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.rules_admin_instructions" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.name_first" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.request_notes" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.request_pid" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.desc_api_token" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.request_devices___1" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.request_ip_ranges___1" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.request_ip_server" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.api_token_attestation" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.request_signature" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_request.api_allow_list_request_complete" Mandatory="No"/>
+	</FormDef>
+	<FormDef OID="Form.api_allow_list_rules" Name="API Allow List Rules" Repeating="No" redcap:FormName="api_allow_list_rules">
+		<ItemGroupRef ItemGroupOID="api_allow_list_rules.request_summary" Mandatory="No"/>
+		<ItemGroupRef ItemGroupOID="api_allow_list_rules.api_allow_list_rules_complete" Mandatory="No"/>
+	</FormDef>
+	<ItemGroupDef OID="api_allow_list_request.rule_id" Name="API Allow List Request" Repeating="No">
+		<ItemRef ItemOID="rule_id" Mandatory="No" redcap:Variable="rule_id"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.rules_admin_instructions" Name="Requestor Information" Repeating="No">
+		<ItemRef ItemOID="rules_admin_instructions" Mandatory="No" redcap:Variable="rules_admin_instructions"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.name_first" Name="API Allow List Request" Repeating="No">
+		<ItemRef ItemOID="name_first" Mandatory="Yes" redcap:Variable="name_first"/>
+		<ItemRef ItemOID="name_last" Mandatory="Yes" redcap:Variable="name_last"/>
+		<ItemRef ItemOID="department" Mandatory="Yes" redcap:Variable="department"/>
+		<ItemRef ItemOID="title_affiliation" Mandatory="Yes" redcap:Variable="title_affiliation"/>
+		<ItemRef ItemOID="user_id" Mandatory="Yes" redcap:Variable="user_id"/>
+		<ItemRef ItemOID="email" Mandatory="Yes" redcap:Variable="email"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.request_notes" Name="API Allowlist Application" Repeating="No">
+		<ItemRef ItemOID="request_notes" Mandatory="Yes" redcap:Variable="request_notes"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.request_pid" Name="API Allow List Request" Repeating="No">
+		<ItemRef ItemOID="request_pid" Mandatory="No" redcap:Variable="request_pid"/>
+		<ItemRef ItemOID="request_phi" Mandatory="No" redcap:Variable="request_phi"/>
+		<ItemRef ItemOID="request_reason___1" Mandatory="Yes" redcap:Variable="request_reason"/>
+		<ItemRef ItemOID="request_reason___2" Mandatory="Yes" redcap:Variable="request_reason"/>
+		<ItemRef ItemOID="request_reason___3" Mandatory="Yes" redcap:Variable="request_reason"/>
+		<ItemRef ItemOID="request_reason___99" Mandatory="Yes" redcap:Variable="request_reason"/>
+		<ItemRef ItemOID="reason_other" Mandatory="Yes" redcap:Variable="reason_other"/>
+		<ItemRef ItemOID="request_vpn_exception" Mandatory="Yes" redcap:Variable="request_vpn_exception"/>
+		<ItemRef ItemOID="request_type___1" Mandatory="Yes" redcap:Variable="request_type"/>
+		<ItemRef ItemOID="request_type___2" Mandatory="Yes" redcap:Variable="request_type"/>
+		<ItemRef ItemOID="request_type___98" Mandatory="Yes" redcap:Variable="request_type"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.desc_api_token" Name="API Token Security" Repeating="No">
+		<ItemRef ItemOID="desc_api_token" Mandatory="No" redcap:Variable="desc_api_token"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.request_devices___1" Name="" Repeating="No">
+		<ItemRef ItemOID="request_devices___1" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___2" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___3" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___4" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___7" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___8" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___11" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___12" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___21" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_devices___22" Mandatory="No" redcap:Variable="request_devices"/>
+		<ItemRef ItemOID="request_token_users" Mandatory="Yes" redcap:Variable="request_token_users"/>
+		<ItemRef ItemOID="request_token_security" Mandatory="Yes" redcap:Variable="request_token_security"/>
+		<ItemRef ItemOID="request_expiration" Mandatory="No" redcap:Variable="request_expiration"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.request_ip_ranges___1" Name="Network Restriction" Repeating="No">
+		<ItemRef ItemOID="request_ip_ranges___1" Mandatory="No" redcap:Variable="request_ip_ranges"/>
+		<ItemRef ItemOID="request_ip_ranges___2" Mandatory="No" redcap:Variable="request_ip_ranges"/>
+		<ItemRef ItemOID="request_ip_ranges___3" Mandatory="No" redcap:Variable="request_ip_ranges"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.request_ip_server" Name="API Allow List Request" Repeating="No">
+		<ItemRef ItemOID="request_ip_server" Mandatory="No" redcap:Variable="request_ip_server"/>
+		<ItemRef ItemOID="request_ip_range_contact" Mandatory="No" redcap:Variable="request_ip_range_contact"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.api_token_attestation" Name="Attestation" Repeating="No">
+		<ItemRef ItemOID="api_token_attestation" Mandatory="Yes" redcap:Variable="api_token_attestation"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.request_signature" Name="API Allow List Request" Repeating="No">
+		<ItemRef ItemOID="request_signature" Mandatory="No" redcap:Variable="request_signature"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_request.api_allow_list_request_complete" Name="Form Status" Repeating="No">
+		<ItemRef ItemOID="api_allow_list_request_complete" Mandatory="No" redcap:Variable="api_allow_list_request_complete"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_rules.request_summary" Name="API Allow List Rules" Repeating="No">
+		<ItemRef ItemOID="request_summary" Mandatory="No" redcap:Variable="request_summary"/>
+		<ItemRef ItemOID="allowlist_type___1" Mandatory="Yes" redcap:Variable="allowlist_type"/>
+		<ItemRef ItemOID="allowlist_type___2" Mandatory="Yes" redcap:Variable="allowlist_type"/>
+		<ItemRef ItemOID="allowlist_type___3" Mandatory="Yes" redcap:Variable="allowlist_type"/>
+		<ItemRef ItemOID="ip_address" Mandatory="Yes" redcap:Variable="ip_address"/>
+		<ItemRef ItemOID="username" Mandatory="Yes" redcap:Variable="username"/>
+		<ItemRef ItemOID="project_id" Mandatory="Yes" redcap:Variable="project_id"/>
+		<ItemRef ItemOID="expiration_date" Mandatory="No" redcap:Variable="expiration_date"/>
+		<ItemRef ItemOID="desc_active_warning" Mandatory="No" redcap:Variable="desc_active_warning"/>
+		<ItemRef ItemOID="desc_active_warning_2" Mandatory="No" redcap:Variable="desc_active_warning_2"/>
+		<ItemRef ItemOID="enabled___1" Mandatory="No" redcap:Variable="enabled"/>
+	</ItemGroupDef>
+	<ItemGroupDef OID="api_allow_list_rules.api_allow_list_rules_complete" Name="Form Status" Repeating="No">
+		<ItemRef ItemOID="api_allow_list_rules_complete" Mandatory="No" redcap:Variable="api_allow_list_rules_complete"/>
+	</ItemGroupDef>
+	<ItemDef OID="rule_id" Name="rule_id" DataType="text" Length="999" redcap:Variable="rule_id" redcap:FieldType="text">
+		<Question><TranslatedText>Rule ID</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="rules_admin_instructions" Name="rules_admin_instructions" DataType="text" Length="999" redcap:Variable="rules_admin_instructions" redcap:FieldType="descriptive" redcap:SectionHeader="Requestor Information" redcap:FieldAnnotation="@HIDDEN-SURVEY">
+		<Question><TranslatedText> API Allowlist Rules Project This is a template survey that you can use for end-users to request new allowlist rules (or firewall exemptions, depending on your language). Feel free to customize this project so long as you leave the following field untouched from the second instrument: &#039;rule_id&#039;, &#039;username&#039;, &#039;project_id&#039;, &#039;ip_address&#039;, &#039;inactive&#039;</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&quot;jumbotron&quot;&gt; &lt;h1&gt;API Allowlist Rules Project&lt;/h1&gt; &lt;p&gt;This is a template survey that you can use for end-users to request new allowlist rules (or firewall exemptions, depending on your language). Feel free to customize this project so long as you leave the following field untouched from the second instrument: &lt;code&gt;&#039;rule_id&#039;, &#039;username&#039;, &#039;project_id&#039;, &#039;ip_address&#039;, &#039;inactive&#039;&lt;/code&gt;&lt;/p&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="name_first" Name="name_first" DataType="text" Length="999" redcap:Variable="name_first" redcap:FieldType="text" redcap:RequiredField="y">
+		<Question><TranslatedText>First name</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="name_last" Name="name_last" DataType="text" Length="999" redcap:Variable="name_last" redcap:FieldType="text" redcap:RequiredField="y">
+		<Question><TranslatedText>Last name</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="department" Name="department" DataType="text" Length="999" redcap:Variable="department" redcap:FieldType="text" redcap:RequiredField="y">
+		<Question><TranslatedText>Department</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="title_affiliation" Name="title_affiliation" DataType="text" Length="999" redcap:Variable="title_affiliation" redcap:FieldType="text" redcap:RequiredField="y">
+		<Question><TranslatedText>Title / Affiliation</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="user_id" Name="user_id" DataType="text" Length="999" redcap:Variable="user_id" redcap:FieldType="text" redcap:FieldNote="This is the name of the user who has the API token on the project" redcap:RequiredField="y">
+		<Question><TranslatedText>User ID</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="email" Name="email" DataType="text" Length="999" redcap:Variable="email" redcap:FieldType="text" redcap:TextValidationType="email" redcap:FieldNote="So we can notify you when we are done" redcap:RequiredField="y">
+		<Question><TranslatedText>Email</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_notes" Name="request_notes" DataType="text" Length="999" redcap:Variable="request_notes" redcap:FieldType="textarea" redcap:SectionHeader="API Allowlist Application" redcap:RequiredField="y" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe your REDCap project(s) and why you think you need an API exception:</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_pid" Name="request_pid" DataType="text" Length="999" redcap:Variable="request_pid" redcap:FieldType="text" redcap:FieldNote="This can be found from the URL when inside your project as pid=xxxxxx" redcap:FieldAnnotation="@PLACEHOLDER=&quot;12345&quot;">
+		<Question><TranslatedText>Please enter the REDCap Project ID(s).  If more than one provide a comma-separated list</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_phi" Name="request_phi" DataType="boolean" Length="1" redcap:Variable="request_phi" redcap:FieldType="yesno">
+		<Question><TranslatedText>Does your project contain PHI?</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_phi.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_reason___1" Name="request_reason___1" DataType="boolean" Length="1" redcap:Variable="request_reason" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe why this request is necessary:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_reason___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_reason___2" Name="request_reason___2" DataType="boolean" Length="1" redcap:Variable="request_reason" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe why this request is necessary:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_reason___2.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_reason___3" Name="request_reason___3" DataType="boolean" Length="1" redcap:Variable="request_reason" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe why this request is necessary:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_reason___3.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_reason___99" Name="request_reason___99" DataType="boolean" Length="1" redcap:Variable="request_reason" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe why this request is necessary:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_reason___99.choices"/>
+	</ItemDef>
+	<ItemDef OID="reason_other" Name="reason_other" DataType="text" Length="999" redcap:Variable="reason_other" redcap:FieldType="textarea" redcap:RequiredField="y" redcap:BranchingLogic="[request_reason(99)] = &#039;1&#039;" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe other reason:</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_vpn_exception" Name="request_vpn_exception" DataType="text" Length="999" redcap:Variable="request_vpn_exception" redcap:FieldType="textarea" redcap:RequiredField="y" redcap:BranchingLogic="[request_reason(3)] = &#039;1&#039;" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please explain why it is not possible to first make a VPN connection prior to using the API?</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_type___1" Name="request_type___1" DataType="boolean" Length="1" redcap:Variable="request_type" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe your application type</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_type___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_type___2" Name="request_type___2" DataType="boolean" Length="1" redcap:Variable="request_type" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe your application type</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_type___2.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_type___98" Name="request_type___98" DataType="boolean" Length="1" redcap:Variable="request_type" redcap:FieldType="checkbox" redcap:RequiredField="y">
+		<Question><TranslatedText>Please describe your application type</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_type___98.choices"/>
+	</ItemDef>
+	<ItemDef OID="desc_api_token" Name="desc_api_token" DataType="text" Length="999" redcap:Variable="desc_api_token" redcap:FieldType="descriptive" redcap:SectionHeader="API Token Security">
+		<Question><TranslatedText>Please note that an API token is like your username and password and should be treated as such.  If you ever feel your API token has been compromised you can reset it on your project in a single click.
+You should NEVER commit your API token to a version control system (GIT, Subversion).
+</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_devices___1" Name="request_devices___1" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___2" Name="request_devices___2" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___2.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___3" Name="request_devices___3" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___3.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___4" Name="request_devices___4" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___4.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___7" Name="request_devices___7" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___7.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___8" Name="request_devices___8" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___8.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___11" Name="request_devices___11" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___11.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___12" Name="request_devices___12" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___12.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___21" Name="request_devices___21" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___21.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_devices___22" Name="request_devices___22" DataType="boolean" Length="1" redcap:Variable="request_devices" redcap:FieldType="checkbox" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please select the kind of device(s) that will be connecting to the API</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_devices___22.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_token_users" Name="request_token_users" DataType="boolean" Length="1" redcap:Variable="request_token_users" redcap:FieldType="yesno" redcap:RequiredField="y">
+		<Question><TranslatedText>Will any other users have access to your API token?</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_token_users.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_token_security" Name="request_token_security" DataType="text" Length="999" redcap:Variable="request_token_security" redcap:FieldType="textarea" redcap:RequiredField="y" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe how you are securing your API token on the device(s) that will be using it?</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_expiration" Name="request_expiration" DataType="date" Length="999" redcap:Variable="request_expiration" redcap:FieldType="text" redcap:TextValidationType="date_ymd">
+		<Question><TranslatedText>Please set a date when this exception should expire (typically the scheduled lifetime of the project)</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_ip_ranges___1" Name="request_ip_ranges___1" DataType="boolean" Length="1" redcap:Variable="request_ip_ranges" redcap:FieldType="checkbox" redcap:SectionHeader="Network Restriction" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe how the device(s) will be connecting to the internet when contacting the API:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_ip_ranges___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_ip_ranges___2" Name="request_ip_ranges___2" DataType="boolean" Length="1" redcap:Variable="request_ip_ranges" redcap:FieldType="checkbox" redcap:SectionHeader="Network Restriction" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe how the device(s) will be connecting to the internet when contacting the API:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_ip_ranges___2.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_ip_ranges___3" Name="request_ip_ranges___3" DataType="boolean" Length="1" redcap:Variable="request_ip_ranges" redcap:FieldType="checkbox" redcap:SectionHeader="Network Restriction" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe how the device(s) will be connecting to the internet when contacting the API:</TranslatedText></Question>
+		<CodeListRef CodeListOID="request_ip_ranges___3.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_ip_server" Name="request_ip_server" DataType="text" Length="999" redcap:Variable="request_ip_server" redcap:FieldType="text" redcap:FieldNote="e.g. 123.123.123.123" redcap:BranchingLogic="[request_ip_ranges(1)] = &#039;1&#039;">
+		<Question><TranslatedText>Please enter the server&#039;s public IP address</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_ip_range_contact" Name="request_ip_range_contact" DataType="text" Length="999" redcap:Variable="request_ip_range_contact" redcap:FieldType="textarea" redcap:BranchingLogic="[request_ip_ranges(2)] = &#039;1&#039;" redcap:CustomAlignment="LV">
+		<Question><TranslatedText>Please describe the area/building where the devices are connected to the internet.  If possible, provide the name of an IT contact and phone number so we could obtain a range of IP addresses the site uses.</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="api_token_attestation" Name="api_token_attestation" DataType="text" Length="999" redcap:Variable="api_token_attestation" redcap:FieldType="text" redcap:FieldNote="INITIAL HERE" redcap:SectionHeader="Attestation" redcap:RequiredField="y">
+		<Question><TranslatedText>I understand that an API token is the SAME as my username and password in plain text format.  Anyone that has access to this credential could obtain access to the data contained in the corresponding REDCap project.</TranslatedText><redcap:FormattedTranslatedText>I understand that an API token is the &lt;b&gt;SAME&lt;/b&gt; as my username and password in plain text format.  Anyone that has access to this credential could obtain access to the data contained in the corresponding REDCap project.</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="request_signature" Name="request_signature" DataType="text" Length="999" redcap:Variable="request_signature" redcap:FieldType="file" redcap:TextValidationType="signature" redcap:FieldNote="[name_first] [name_last]">
+		<Question><TranslatedText>Please sign your request:</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="api_allow_list_request_complete" Name="api_allow_list_request_complete" DataType="text" Length="1" redcap:Variable="api_allow_list_request_complete" redcap:FieldType="select" redcap:SectionHeader="Form Status">
+		<Question><TranslatedText>Complete?</TranslatedText></Question>
+		<CodeListRef CodeListOID="api_allow_list_request_complete.choices"/>
+	</ItemDef>
+	<ItemDef OID="request_summary" Name="request_summary" DataType="text" Length="999" redcap:Variable="request_summary" redcap:FieldType="descriptive">
+		<Question><TranslatedText>REQUEST SUMMARY
+
+NAME:
+[name_first] [name_last]
+[user_id]
+[department]
+[title_affiliation]
+[email]
+PID: [request_pid]
+PHI: [request_phi]
+REQUEST:
+[request_reason]
+[reason_other]
+VPN:
+[request_vpn_exception]
+TYPE:
+[request_type]
+DEVICE:
+[request_devices]
+API SECURITY:
+[request_token_users]
+[request_token_security]
+IP:
+[request_ip_ranges]
+[request_ip_server]
+[request_ip_range_contact]
+EXPIRATION:
+[request_expiration]
+ATTESTATION:
+[api_token_attestation]
+</TranslatedText><redcap:FormattedTranslatedText>REQUEST SUMMARY
+&lt;div class=&quot;pl-2&quot;&gt;
+NAME:
+[name_first] [name_last]
+[user_id]
+[department]
+[title_affiliation]
+[email]
+PID: [request_pid]
+PHI: [request_phi]
+REQUEST:
+[request_reason]
+[reason_other]
+VPN:
+[request_vpn_exception]
+TYPE:
+[request_type]
+DEVICE:
+[request_devices]
+API SECURITY:
+[request_token_users]
+[request_token_security]
+IP:
+[request_ip_ranges]
+[request_ip_server]
+[request_ip_range_contact]
+EXPIRATION:
+[request_expiration]
+ATTESTATION:
+[api_token_attestation]
+&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="allowlist_type___1" Name="allowlist_type___1" DataType="boolean" Length="1" redcap:Variable="allowlist_type" redcap:FieldType="checkbox" redcap:FieldNote="A allowlist rule is only valid if all configured filters are true.  So, the more specific you are, the more limiting your filter is." redcap:RequiredField="y">
+		<Question><TranslatedText>Allowlist Options
+If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.</TranslatedText><redcap:FormattedTranslatedText>Allowlist Options
+&lt;div style=&quot;font-weight:normal&quot;&gt;If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<CodeListRef CodeListOID="allowlist_type___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="allowlist_type___2" Name="allowlist_type___2" DataType="boolean" Length="1" redcap:Variable="allowlist_type" redcap:FieldType="checkbox" redcap:FieldNote="A allowlist rule is only valid if all configured filters are true.  So, the more specific you are, the more limiting your filter is." redcap:RequiredField="y">
+		<Question><TranslatedText>Allowlist Options
+If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.</TranslatedText><redcap:FormattedTranslatedText>Allowlist Options
+&lt;div style=&quot;font-weight:normal&quot;&gt;If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<CodeListRef CodeListOID="allowlist_type___2.choices"/>
+	</ItemDef>
+	<ItemDef OID="allowlist_type___3" Name="allowlist_type___3" DataType="boolean" Length="1" redcap:Variable="allowlist_type" redcap:FieldType="checkbox" redcap:FieldNote="A allowlist rule is only valid if all configured filters are true.  So, the more specific you are, the more limiting your filter is." redcap:RequiredField="y">
+		<Question><TranslatedText>Allowlist Options
+If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.</TranslatedText><redcap:FormattedTranslatedText>Allowlist Options
+&lt;div style=&quot;font-weight:normal&quot;&gt;If you make a filter that only operates on IP, then regardless of user and project a valid IP will be allowed.  Conversely, if you specify IP, User, and Project, then requests will have to match all three filters to be allowed.&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+		<CodeListRef CodeListOID="allowlist_type___3.choices"/>
+	</ItemDef>
+	<ItemDef OID="ip_address" Name="ip_address" DataType="text" Length="999" redcap:Variable="ip_address" redcap:FieldType="textarea" redcap:FieldNote="e.g. 192.168.0.1/24, 10.0.0.1 &lt;a href=&#039;https://grox.net/utils/whatmask/&#039; target=&#039;_BLANK&#039;&gt;&lt;div class=&#039;btn btn-xs btn-primaryrc&#039;&gt;Calculator&lt;/div&gt;&lt;/a&gt;" redcap:RequiredField="y" redcap:BranchingLogic="[allowlist_type(1)] = &#039;1&#039;">
+		<Question><TranslatedText>IP Address(es) (CIDR Notation Supported)
+Enter 1 or more CIDR blocks separated by a comma or new-line</TranslatedText><redcap:FormattedTranslatedText>IP Address(es) (CIDR Notation Supported)
+&lt;div style=&quot;font-weight:normal&quot;&gt;Enter 1 or more CIDR blocks separated by a comma or new-line&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="username" Name="username" DataType="text" Length="999" redcap:Variable="username" redcap:FieldType="text" redcap:FieldNote="e.g. andy123" redcap:RequiredField="y" redcap:BranchingLogic="[allowlist_type(2)] = &#039;1&#039;">
+		<Question><TranslatedText>Username
+
+Converted from sql to text: 
+select username, CONCAT_WS(&quot; &quot;, CONCAT(&quot;[&quot;,username,&quot;]&quot;),user_firstname, user_lastname) from redcap_user_information order by username;</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="project_id" Name="project_id" DataType="text" Length="999" redcap:Variable="project_id" redcap:FieldType="text" redcap:RequiredField="y" redcap:BranchingLogic="[allowlist_type(3)] = &#039;1&#039;">
+		<Question><TranslatedText>Project Id
+
+Converted from sql to text:
+select project_id, CONCAT_WS(&quot; &quot;,CONCAT(&quot;[&quot;, project_id, &quot;]&quot;), app_title) from redcap_projects;
+</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="expiration_date" Name="expiration_date" DataType="date" Length="999" redcap:Variable="expiration_date" redcap:FieldType="text" redcap:TextValidationType="date_ymd" redcap:FieldNote="Rule will stop working after date if specified">
+		<Question><TranslatedText>Expiration Date</TranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="desc_active_warning" Name="desc_active_warning" DataType="text" Length="999" redcap:Variable="desc_active_warning" redcap:FieldType="descriptive" redcap:BranchingLogic="datediff([expiration_date],&quot;today&quot;,&quot;d&quot;,&quot;ymd&quot;,true) &gt; 0 OR [enabled(1)] = &quot;0&quot; OR ( sum([allowlist_type(1)],[allowlist_type(2)],[allowlist_type(3)]) = 0 )">
+		<Question><TranslatedText>THIS ALLOWLIST RULE IS NOT ACTIVE</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-danger text-center&#039;&gt;&lt;span class=&#039;badge&#039;&gt;THIS ALLOWLIST RULE IS NOT ACTIVE&lt;/span&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="desc_active_warning_2" Name="desc_active_warning_2" DataType="text" Length="999" redcap:Variable="desc_active_warning_2" redcap:FieldType="descriptive" redcap:BranchingLogic="( [expiration_date] = &#039;&#039; OR datediff([expiration_date],&quot;today&quot;,&quot;d&quot;,&quot;ymd&quot;,true) &lt; 0 ) AND [enabled(1)] = &quot;1&quot; AND ( sum([allowlist_type(1)],[allowlist_type(2)],[allowlist_type(3)]) &gt; 0 )">
+		<Question><TranslatedText>THIS ALLOWLIST RULE IS ACTIVE</TranslatedText><redcap:FormattedTranslatedText>&lt;div class=&#039;alert alert-success text-center&#039;&gt;&lt;span class=&#039;badge&#039;&gt;THIS ALLOWLIST RULE IS ACTIVE&lt;/span&gt;&lt;/div&gt;</redcap:FormattedTranslatedText></Question>
+	</ItemDef>
+	<ItemDef OID="enabled___1" Name="enabled___1" DataType="boolean" Length="1" redcap:Variable="enabled" redcap:FieldType="checkbox" redcap:FieldNote="You must check to enable this rule">
+		<Question><TranslatedText></TranslatedText></Question>
+		<CodeListRef CodeListOID="enabled___1.choices"/>
+	</ItemDef>
+	<ItemDef OID="api_allow_list_rules_complete" Name="api_allow_list_rules_complete" DataType="text" Length="1" redcap:Variable="api_allow_list_rules_complete" redcap:FieldType="select" redcap:SectionHeader="Form Status">
+		<Question><TranslatedText>Complete?</TranslatedText></Question>
+		<CodeListRef CodeListOID="api_allow_list_rules_complete.choices"/>
+	</ItemDef>
+	<CodeList OID="request_phi.choices" Name="request_phi" DataType="boolean" redcap:Variable="request_phi">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Yes</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>No</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_reason___1.choices" Name="request_reason___1" DataType="boolean" redcap:Variable="request_reason" redcap:CheckboxChoices="1, Use of myCap|2, Use of Mobile App|3, Unable to use VPN prior to API access|99, Other">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_reason___2.choices" Name="request_reason___2" DataType="boolean" redcap:Variable="request_reason" redcap:CheckboxChoices="1, Use of myCap|2, Use of Mobile App|3, Unable to use VPN prior to API access|99, Other">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_reason___3.choices" Name="request_reason___3" DataType="boolean" redcap:Variable="request_reason" redcap:CheckboxChoices="1, Use of myCap|2, Use of Mobile App|3, Unable to use VPN prior to API access|99, Other">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_reason___99.choices" Name="request_reason___99" DataType="boolean" redcap:Variable="request_reason" redcap:CheckboxChoices="1, Use of myCap|2, Use of Mobile App|3, Unable to use VPN prior to API access|99, Other">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_type___1.choices" Name="request_type___1" DataType="boolean" redcap:Variable="request_type" redcap:CheckboxChoices="1, Exception for a single REDCap project and User.  Select this if you are using non-stanford devices or might be roaming around the world (e.g. a study in a foreign country)|2, Exception for a new trusted ip/network range (e.g. a lab or clinic) . Select this if you have a Stanford-owned server that meets MINSEC and is kept in a secure location.|98, I&#039;m not sure">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_type___2.choices" Name="request_type___2" DataType="boolean" redcap:Variable="request_type" redcap:CheckboxChoices="1, Exception for a single REDCap project and User.  Select this if you are using non-stanford devices or might be roaming around the world (e.g. a study in a foreign country)|2, Exception for a new trusted ip/network range (e.g. a lab or clinic) . Select this if you have a Stanford-owned server that meets MINSEC and is kept in a secure location.|98, I&#039;m not sure">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_type___98.choices" Name="request_type___98" DataType="boolean" redcap:Variable="request_type" redcap:CheckboxChoices="1, Exception for a single REDCap project and User.  Select this if you are using non-stanford devices or might be roaming around the world (e.g. a study in a foreign country)|2, Exception for a new trusted ip/network range (e.g. a lab or clinic) . Select this if you have a Stanford-owned server that meets MINSEC and is kept in a secure location.|98, I&#039;m not sure">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___1.choices" Name="request_devices___1" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___2.choices" Name="request_devices___2" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___3.choices" Name="request_devices___3" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___4.choices" Name="request_devices___4" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___7.choices" Name="request_devices___7" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___8.choices" Name="request_devices___8" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___11.choices" Name="request_devices___11" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___12.choices" Name="request_devices___12" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___21.choices" Name="request_devices___21" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_devices___22.choices" Name="request_devices___22" DataType="boolean" redcap:Variable="request_devices" redcap:CheckboxChoices="1, Your Stanford laptop/desktop | 2, Your Stanford mobile device | 3, A Stanford server hosted in my department | 4, A Stanford server hosted in a data center | 7, A Cloud-hosted server managed by Stanford | 8, A Cloud-hosted server NOT managed by Stanford | 11, Other Stanford users&#039; laptop/desktops | 12, Other Stanford users&#039; mobile devices | 21, Non-Stanford employee computers | 22, Non-Stanford mobile devices">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_token_users.choices" Name="request_token_users" DataType="boolean" redcap:Variable="request_token_users">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Yes</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>No</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_ip_ranges___1.choices" Name="request_ip_ranges___1" DataType="boolean" redcap:Variable="request_ip_ranges" redcap:CheckboxChoices="1, Static IP Address (e.g. server)|2, Dynamic IP address inside of a building (a range that could be selected, e.g. an off-site clinic)|3, Dynamic IP address all around the world (e.g. Starbucks to personal Comcast internet)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_ip_ranges___2.choices" Name="request_ip_ranges___2" DataType="boolean" redcap:Variable="request_ip_ranges" redcap:CheckboxChoices="1, Static IP Address (e.g. server)|2, Dynamic IP address inside of a building (a range that could be selected, e.g. an off-site clinic)|3, Dynamic IP address all around the world (e.g. Starbucks to personal Comcast internet)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="request_ip_ranges___3.choices" Name="request_ip_ranges___3" DataType="boolean" redcap:Variable="request_ip_ranges" redcap:CheckboxChoices="1, Static IP Address (e.g. server)|2, Dynamic IP address inside of a building (a range that could be selected, e.g. an off-site clinic)|3, Dynamic IP address all around the world (e.g. Starbucks to personal Comcast internet)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="api_allow_list_request_complete.choices" Name="api_allow_list_request_complete" DataType="text" redcap:Variable="api_allow_list_request_complete">
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Incomplete</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Unverified</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="2"><Decode><TranslatedText>Complete</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="allowlist_type___1.choices" Name="allowlist_type___1" DataType="boolean" redcap:Variable="allowlist_type" redcap:CheckboxChoices="1, IP (filter by ip/networks) | 2, User (filter by username) | 3, Project (filter by project id)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="allowlist_type___2.choices" Name="allowlist_type___2" DataType="boolean" redcap:Variable="allowlist_type" redcap:CheckboxChoices="1, IP (filter by ip/networks) | 2, User (filter by username) | 3, Project (filter by project id)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="allowlist_type___3.choices" Name="allowlist_type___3" DataType="boolean" redcap:Variable="allowlist_type" redcap:CheckboxChoices="1, IP (filter by ip/networks) | 2, User (filter by username) | 3, Project (filter by project id)">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="enabled___1.choices" Name="enabled___1" DataType="boolean" redcap:Variable="enabled" redcap:CheckboxChoices="1, Check to enable this rule">
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Checked</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Unchecked</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+	<CodeList OID="api_allow_list_rules_complete.choices" Name="api_allow_list_rules_complete" DataType="text" redcap:Variable="api_allow_list_rules_complete">
+		<CodeListItem CodedValue="0"><Decode><TranslatedText>Incomplete</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="1"><Decode><TranslatedText>Unverified</TranslatedText></Decode></CodeListItem>
+		<CodeListItem CodedValue="2"><Decode><TranslatedText>Complete</TranslatedText></Decode></CodeListItem>
+	</CodeList>
+</MetaDataVersion>
+</Study>
+</ODM>
