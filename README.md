@@ -4,8 +4,8 @@ This external module adds additional IP, user, and project-based constraints on 
 ## Changes
 - 2022-02-24
   - Updated the way logging was done to meet requirements of newer EM framework versions
-  - If you have previously installed this EM, you need to update the rules project and also the logging table
-    - `alter table `
+  - If you have previously installed this EM, you need to update the rules project and also add a new column to the logging table:
+   <br> `alter table redcap_log_api_allowlist add column notified bit default b'0';`
 
 ## How it works
 This module provides a security filter to all API requests, blocking all API requests by default and only
