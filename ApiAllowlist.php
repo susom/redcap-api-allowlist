@@ -852,20 +852,20 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
     public function createLogTableSql() {
         $sql="
             CREATE TABLE `" . self::LOG_TABLE . "` (
-              `log_id` int NOT NULL AUTO_INCREMENT,
-              `ip_address` varchar(50) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `username` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-              `project_id` int DEFAULT NULL,
-              `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-              `duration` float DEFAULT NULL,
-              `result` enum('PASS','REJECT','ERROR') CHARACTER SET utf8 DEFAULT NULL,
-              `rule_id` int DEFAULT NULL,
-              `comment` text CHARACTER SET utf8,
-              PRIMARY KEY (`log_id`),
-              INDEX (`username`),
-              INDEX (`project_id`)
-            ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        ";
+               `log_id` int NOT NULL AUTO_INCREMENT,
+               `ip_address` varchar(50) DEFAULT NULL,
+               `username` varchar(255) DEFAULT NULL,
+               `project_id` int DEFAULT NULL,
+               `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+               `duration` float DEFAULT NULL,
+               `result` enum('PASS','REJECT','ERROR') DEFAULT NULL,
+               `rule_id` int DEFAULT NULL,
+               `comment` text,
+               `notified` bit DEFAULT b'0',
+               PRIMARY KEY (`log_id`),
+               INDEX (`username`),
+               INDEX (`project_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
         return $sql;
     }
 

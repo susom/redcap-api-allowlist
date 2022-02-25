@@ -1,6 +1,12 @@
 # API Allowlist
 This external module adds additional IP, user, and project-based constraints on API access to REDCap.
 
+## Changes
+- 2022-02-24
+  - Updated the way logging was done to meet requirements of newer EM framework versions
+  - If you have previously installed this EM, you need to update the rules project and also the logging table
+    - `alter table `
+
 ## How it works
 This module provides a security filter to all API requests, blocking all API requests by default and only
 allowing permitted API requests based on project, user, or IP range.
