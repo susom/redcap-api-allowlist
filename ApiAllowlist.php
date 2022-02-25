@@ -928,11 +928,15 @@ class ApiAllowlist extends \ExternalModules\AbstractExternalModule
             SELECT username, project_id
             FROM redcap_user_rights
             WHERE api_token = ?";
-        $q = $this->query($sql, $token);
-        if ($row = $q->fetch_assoc()) {
+        $q = $this->createQuery();
+        $q->add($sql, [$token]);
+        $result = $q->execute();
+        $num_results = $q->affected_rows;
+        if ($num_results == 1) {
+            $row = $result->fetch_assoc();
             return array($row['username'], $row['project_id']);
         } else {
-            throw new Exception ("Returned invalid number of rows (" . db_num_rows($q) . ") in " . __METHOD__ . " from token '$token'");
+            throw new Exception ("Returned $num_results in " . __METHOD__ . " from token '$token'");
         }
     }
 
