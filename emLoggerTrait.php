@@ -47,23 +47,6 @@ trait emLoggerTrait
 
 
     /**
-     * Determine if we are in debug mode either on system or project level and cache
-     * @return bool
-     */
-    function emLoggerDebugMode() {
-        // Set if debug mode once on the first log call
-        if (is_null($this->emLoggerDebug)) {
-            $systemDebug         = $this->getSystemSetting('enable-system-debug-logging');
-            $projectDebug        = !empty($_GET['pid']) &&
-                intval($_GET['pid']) == $_GET['pid'] &&
-                $this->getProjectSetting('enable-project-debug-logging');
-            $this->emLoggerDebug = $systemDebug || $projectDebug;
-        }
-        return $this->emLoggerDebug;
-    }
-
-
-    /**
      * Obtain an instance of emLogger or false if not installed / active
      * @return bool|mixed
      */
@@ -87,6 +70,23 @@ trait emLoggerTrait
             }
         }
         return false;
+    }
+
+
+    /**
+     * Determine if we are in debug mode either on system or project level and cache
+     * @return bool
+     */
+    function emLoggerDebugMode() {
+        // Set if debug mode once on the first log call
+        if (is_null($this->emLoggerDebug)) {
+            $systemDebug         = $this->getSystemSetting('enable-system-debug-logging');
+            $projectDebug        = !empty($_GET['pid']) &&
+                intval($_GET['pid']) == $_GET['pid'] &&
+                $this->getProjectSetting('enable-project-debug-logging');
+            $this->emLoggerDebug = $systemDebug || $projectDebug;
+        }
+        return $this->emLoggerDebug;
     }
 
 
