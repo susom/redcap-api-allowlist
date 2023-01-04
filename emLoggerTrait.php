@@ -81,10 +81,7 @@ trait emLoggerTrait
         // Set if debug mode once on the first log call
         if (is_null($this->emLoggerDebug)) {
             $systemDebug         = $this->getSystemSetting('enable-system-debug-logging');
-            $projectDebug        = !empty($_GET['pid']) &&
-                intval($_GET['pid']) == $_GET['pid'] &&
-                $this->getProjectSetting('enable-project-debug-logging');
-            $this->emLoggerDebug = $systemDebug || $projectDebug;
+            $this->emLoggerDebug = $systemDebug; // There is no project debug option for API Allowlist
         }
         return $this->emLoggerDebug;
     }
