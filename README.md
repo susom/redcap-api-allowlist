@@ -71,3 +71,15 @@ User Rights page,  This will delete your API token and prevent future emails.
 
 ### How can I thank the developers of this EM?
 - Beer and other beverages can be shipped to 455 Broadway, 3rd floor Discovery Hall, Redwood City, CA - Attn: REDCap Team
+
+### Alerts and Notifications setup
+The Alerts & Notifications feature allows you to construct alerts and send customized notifications.
+These notifications may be sent to one or more recipients and can be triggered or scheduled when a form/survey is saved and/or based on conditional logic whenever data is saved or imported.
+
+The following two alerts are implemented in the Stanford REDCap instance and might be useful:
+
+1. Forward to service desk (JIRA)
+   1. When 'API Allow List Request' is saved with a complete status: send to JIRA email handler
+2. API exception about to expire
+   1. When an API Allow List rule is about to expire: `datediff([expiration_date], 'today','M')<=1 and [enabled(1)]='1'`
+   2. Send email to user detailing expiration
